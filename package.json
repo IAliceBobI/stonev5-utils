@@ -1,0 +1,58 @@
+{
+  "name": "stonev5-utils",
+  "version": "1.0.33",
+  "description": "all my utils here",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stonev5/stonev5-utils.git"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "build": "npx tsc -p .",
+    "pub": "npm run build && npm version patch && npm publish"
+  },
+  "keywords": [
+    "utils",
+    "cmd",
+    "file",
+    "global",
+    "string",
+    "time",
+    "pinyin",
+    "rand",
+    "object",
+    "array",
+    "desktop",
+    "dom",
+    "parallel",
+    "id",
+    "md5",
+    "clipboard",
+    "typescript",
+    "nodejs",
+    "stonev5",
+    "library"
+  ],
+  "author": "stonev5",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "ts-md5": "^1.3.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.3",
+    "jest": "^30.0.0",
+    "jest-html-reporters": "^3.1.7",
+    "pinyin-pro": "^3.26.0",
+    "ts-jest": "^29.4.0",
+    "@types/uuid": "^9.0.8",
+    "uuid": "^9.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
