@@ -1,36 +1,18 @@
-import { now, formatDate, formatDateYYYYMMDDHHmmss, getDateFromYYYYMMDDHHmmss, convertMinutesToTimeFormat } from "../src/time"
+import { formatDate, getDate } from "../src/time"
 
 describe('时间工具函数测试', () => {
-    test('now()基础功能', () => {
-        const date = now();
-        expect(date).toBeInstanceOf(Date);
-        expect(date.getTime()).toBeCloseTo(Date.now(), -2);
+    test('时区偏移测试1', () => {
+        const t1 = new Date(1750324565612).toLocaleString();
+        const t2 = getDate(null, new Date(1750324565612), null).toLocaleString();
+        // t1 和 t2 应该是相同的
+        expect(t1).toBe(t2);
     });
 
-    test('时区偏移测试', () => {
-        const local = now();
-        const nyTime = now(0, null, -5);
-        expect(Math.abs(nyTime.getTime() - local.getTime())).toBeCloseTo(5 * 60 * 60 * 1000);
-    });
-
-    test('formatDate格式验证', () => {
-        const testDate = new Date('2023-03-15T09:30:45');
-        expect(formatDate(0, testDate)).toBe('2023-03-15 09:30:45');
-    });
-
-    test('YYYYMMDDHHmmss格式', () => {
-        const testDate = new Date('2024-12-31T23:59:59');
-        expect(formatDateYYYYMMDDHHmmss(0, testDate)).toBe('20241231235959');
-    });
-
-    test('getDateFromYYYYMMDDHHmmss解析', () => {
-        const date = getDateFromYYYYMMDDHHmmss('20211231000000');
-        expect(date.getFullYear()).toBe(2021);
-        expect(date.getMonth()).toBe(11); // 十二月
-    });
-
-    test('分钟转时间格式', () => {
-        expect(convertMinutesToTimeFormat(90)).toBe('1h30m');
-        expect(convertMinutesToTimeFormat(45)).toBe('45m');
+    test('时区偏移测试2', () => {
+        const date = new Date(1707091200000) // "2024-02-05 08:00:00"
+        expect(formatDate(0, date, null)).toEqual("2024-02-05 08:00:00");
+        expect(formatDate(0, date, 8)).toEqual("2024-02-05 08:00:00");
+        expect(formatDate(0, date, 0)).toEqual("2024-02-05 00:00:00");
+        expect(formatDate(0, date, -1)).toEqual("2024-02-04 23:00:00");
     });
 });

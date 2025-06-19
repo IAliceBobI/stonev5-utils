@@ -2,16 +2,38 @@
  * 获取当前时间
  * @param deltaSecs 时间偏移量，单位秒
  * @param date 基准日期
- * @param offsetHours 时区偏移量，单位小时
+ * @param offsetHours null为本地时间。 时区偏移量，单位小时, 北京时间为 +8
  * @returns 
  */
-export function now(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
-    if (date == null) date = new Date();
-    deltaSecs += offsetHours * 60 * 60
-    if (deltaSecs != 0) {
-        date = new Date(date.getTime() + deltaSecs * 1000)
+export function getDate(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null): Date {
+    if (date == null) {
+        date = new Date();
+    } else {
+        date = new Date(date); // 确保不修改原始日期对象
     }
-    return date;
+    if (deltaSecs == null) deltaSecs = 0
+    if (offsetHours == null) {
+        if (deltaSecs == 0) {
+            // 如果没有偏移量，直接返回当前时间
+            return date;
+        } else {
+            // 如果没有时区偏移量，直接返回当前时间加上偏移量
+            return new Date(date.getTime() + deltaSecs * 1000);
+        }
+    } else {
+        offsetHours = -offsetHours; // 内部计算是 utc-offset，所以这里需要取反
+        const ms = date.getTime(); // 获取当前时间的毫秒数
+        let tms = ms + date.getTimezoneOffset() * 60 * 1000; // 将本地时间转换为 UTC ms
+        tms -= offsetHours * 60 * 60 * 1000; // 将 UTC ms 时间转换为目标时区时间的 ms
+        if (tms != ms) {
+            date = new Date(tms + deltaSecs * 1000); // 将目标时区时间的 ms 加上偏移量
+        } else {
+            if (deltaSecs != 0) {
+                date = new Date(ms + deltaSecs * 1000); // 如果没有时区偏移量，直接返回当前时间加上偏移量
+            }
+        }
+        return date;
+    }
 }
 
 /**
@@ -21,8 +43,8 @@ export function now(deltaSecs = 0, date?: Date | null | undefined, offsetHours =
  * @param offsetHours 时区偏移量，单位小时
  * @returns 
  */
-export function getCurrentDateTimeComponents(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
-    date = now(deltaSecs, date, offsetHours);
+export function getCurrentDateTimeComponents(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null) {
+    date = getDate(deltaSecs, date, offsetHours);
     const year = date.getFullYear().toString();
     const month = (date.getMonth() + 1); // Month value needs +1 as it starts from 0.
     const day = date.getDate();
@@ -44,7 +66,7 @@ export function getCurrentDateTimeComponents(deltaSecs = 0, date?: Date | null |
  * @param date 日期
  * @returns 格式化后的日期字符串
  */
-export function formatDate(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
+export function formatDate(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null) {
     const { year, monthPad, dayPad, hoursPad, minutesPad, secondsPad } = getCurrentDateTimeComponents(deltaSecs, date, offsetHours);
     return year + "-" + monthPad + "-" + dayPad + " " + hoursPad + ":" + minutesPad + ":" + secondsPad;
 }
@@ -54,7 +76,7 @@ export function formatDate(deltaSecs = 0, date?: Date | null | undefined, offset
  * @param date 日期
  * @returns 格式化后的日期字符串
  */
-export function formatDateYYYYMMDDHHmmss(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
+export function formatDateYYYYMMDDHHmmss(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null) {
     const { year, monthPad, dayPad, hoursPad, minutesPad, secondsPad } = getCurrentDateTimeComponents(deltaSecs, date, offsetHours);
     return year + monthPad + dayPad + hoursPad + minutesPad + secondsPad;
 }
@@ -64,7 +86,7 @@ export function formatDateYYYYMMDDHHmmss(deltaSecs = 0, date?: Date | null | und
  * @param date 日期
  * @returns 格式化后的日期字符串
  */
-export function getDayStr(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
+export function getDayStr(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null) {
     const { year, monthPad, dayPad } = getCurrentDateTimeComponents(deltaSecs, date, offsetHours);
     return `${year}-${monthPad}-${dayPad};`
 }
@@ -74,7 +96,7 @@ export function getDayStr(deltaSecs = 0, date?: Date | null | undefined, offsetH
  * @param date 日期
  * @returns 格式化后的日期字符串
  */
-export function getTimeStr(deltaSecs = 0, date?: Date | null | undefined, offsetHours = 0) {
+export function getTimeStr(deltaSecs?: number | null, date?: Date | null, offsetHours?: number | null) {
     const { hoursPad, minutesPad, secondsPad } = getCurrentDateTimeComponents(deltaSecs, date, offsetHours);
     return `${hoursPad}:${minutesPad}:${secondsPad}`;
 }
