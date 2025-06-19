@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stonev5/stonev5-utils.git"
+    "url": "git+https://github.com/IAliceBobI/stonev5-utils.git"
   },
   "scripts": {
     "test": "jest",
