@@ -54,6 +54,14 @@ export function pushUniq<T>(arr: T[] | undefined, ...items: T[]): T[] {
     return arr;
 }
 
+export function pushUniqBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any): T[] {
+    if (!arr) arr = [];
+    if (arr.find(v => by(v) === by(item)) == null) {
+        arr.push(item)
+    }
+    return arr;
+}
+
 export function push<T>(arr: T[] | undefined, ...items: T[]): T[] {
     if (!arr) arr = [];
     arr.push(...items);
