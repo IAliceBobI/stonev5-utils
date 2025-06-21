@@ -62,6 +62,17 @@ export function pushUniqBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any):
     return arr;
 }
 
+export function pushReplaceBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any): T[] {
+    if (!arr) arr = [];
+    const idx = arr.findIndex(v => by(v) === by(item));
+    if (idx >= 0) {
+        arr[idx] = item;
+    } else {
+        arr.push(item);
+    }
+    return arr;
+}
+
 export function push<T>(arr: T[] | undefined, ...items: T[]): T[] {
     if (!arr) arr = [];
     arr.push(...items);
