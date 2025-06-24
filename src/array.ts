@@ -18,7 +18,7 @@ export function arrayDeleteFromLeft<T>(list: T[], keep: (i: T, idx: number, arr:
     return list;
 }
 
-export function pushNotNull<T>(arr: T[] | undefined, ...items: T[]): T[] {
+export function pushNotNull<T>(arr: T[] | undefined | null, ...items: T[]): T[] {
     if (!arr) arr = [];
     if (items != null) {
         for (const i of items) {
@@ -30,7 +30,7 @@ export function pushNotNull<T>(arr: T[] | undefined, ...items: T[]): T[] {
     return arr;
 }
 
-export function removeFromArr<T>(arr: T[] | undefined, ...items: T[]): T[] {
+export function removeFromArr<T>(arr: T[] | undefined | null, ...items: T[]): T[] {
     if (!arr) arr = [];
     for (let i = 0; i < items.length; i++) {
         // 由于 items.at(i) 可能返回 undefined，而 indexOf 方法期望的参数类型是 T，因此需要先检查是否为 undefined
@@ -44,7 +44,7 @@ export function removeFromArr<T>(arr: T[] | undefined, ...items: T[]): T[] {
     return arr;
 }
 
-export function pushUniq<T>(arr: T[] | undefined, ...items: T[]): T[] {
+export function pushUniq<T>(arr: T[] | undefined | null, ...items: T[]): T[] {
     if (!arr) arr = [];
     for (const i of items) {
         const idx = arr.indexOf(i)
@@ -54,7 +54,7 @@ export function pushUniq<T>(arr: T[] | undefined, ...items: T[]): T[] {
     return arr;
 }
 
-export function pushUniqBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any): T[] {
+export function pushUniqBy<T>(arr: T[] | undefined | null, item: T, by: (t: T) => any): T[] {
     if (!arr) arr = [];
     if (arr.find(v => by(v) === by(item)) == null) {
         arr.push(item)
@@ -62,7 +62,7 @@ export function pushUniqBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any):
     return arr;
 }
 
-export function pushReplaceBy<T>(arr: T[] | undefined, item: T, by: (t: T) => any): T[] {
+export function pushReplaceBy<T>(arr: T[] | undefined | null, item: T, by: (t: T) => any): T[] {
     if (!arr) arr = [];
     const idx = arr.findIndex(v => by(v) === by(item));
     if (idx >= 0) {
@@ -73,7 +73,7 @@ export function pushReplaceBy<T>(arr: T[] | undefined, item: T, by: (t: T) => an
     return arr;
 }
 
-export function push<T>(arr: T[] | undefined, ...items: T[]): T[] {
+export function push<T>(arr: T[] | undefined | null, ...items: T[]): T[] {
     if (!arr) arr = [];
     arr.push(...items);
     return arr;
