@@ -18,6 +18,16 @@ export function arrayDeleteFromLeft<T>(list: T[], keep: (i: T, idx: number, arr:
     return list;
 }
 
+export function arrayRemoveBy<T>(list: T[], remove: (i: T, idx: number, arr: T[]) => boolean) {
+    for (let i = 0; i < list.length; i++) {
+        if (remove(list[i], i, list)) {
+            list.splice(i, 1);
+            i--;
+        }
+    }
+    return list;
+}
+
 export function pushNotNull<T>(arr: T[] | undefined | null, ...items: T[]): T[] {
     if (!arr) arr = [];
     if (items != null) {
