@@ -146,4 +146,17 @@ export function uniqueFilter<T>(keySelector: (item: T) => any) {
     };
 };
 
+export function removeXAndAfter<T>(arr: T[], find: (v: T) => boolean) {
+    const idx = arr.findIndex(find)
+    if (idx !== -1) {
+        arr.splice(idx, Number.MAX_SAFE_INTEGER)
+    }
+}
+
+export function removeAfter<T>(arr: T[], find: (v: T) => boolean) {
+    const idx = arr.findIndex(find)
+    if (idx !== -1) {
+        arr.splice(idx + 1, Number.MAX_SAFE_INTEGER)
+    }
+}
 
