@@ -50,3 +50,9 @@ export function isStringNumber(str: string): boolean {
     return !isNaN(+str);
 }
 
+export function validateNum(num: any, v: number) {
+    if (isValidNumber(num)) {
+        return num;
+    }
+    return v;
+}
