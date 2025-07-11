@@ -136,3 +136,43 @@ export function sleep(ms: number): Promise<void> {
         setTimeout(resolve, ms);
     });
 }
+
+export function readableDuration(ms: number): string {
+    if (ms < 0) {
+        return readableDuration(-ms);
+    }
+
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const years = Math.floor(days / 365);
+
+    const remainingDays = days % 365;
+    const remainingHours = hours % 24;
+    const remainingMinutes = minutes % 60;
+    const remainingSeconds = seconds % 60;
+
+    const parts: string[] = [];
+
+    if (years > 0) {
+        parts.push(`${years}y`);
+    }
+    if (remainingDays > 0) {
+        parts.push(`${remainingDays}M`);
+    }
+    if (remainingHours > 0) {
+        parts.push(`${remainingHours}d`);
+    }
+    if (remainingMinutes > 0) {
+        parts.push(`${remainingMinutes}h`);
+    }
+    if (remainingSeconds > 0) {
+        parts.push(`${remainingSeconds}m`);
+    }
+    if (parts.length === 0) {
+        return '0s';
+    }
+
+    return parts.join(' ');
+}
