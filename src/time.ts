@@ -137,42 +137,27 @@ export function sleep(ms: number): Promise<void> {
     });
 }
 
-export function readableDuration(ms: number): string {
-    if (ms < 0) {
-        return readableDuration(-ms);
-    }
+export function readableDuration(secs: number, partLen = 10): string {
+    if (secs <= 0) return '0s';
 
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    const years = Math.floor(days / 365);
+    const units = [
+        { name: 'y', seconds: 365 * 24 * 60 * 60 },
+        { name: 'd', seconds: 24 * 60 * 60 },
+        { name: 'h', seconds: 60 * 60 },
+        { name: 'm', seconds: 60 },
+        { name: 's', seconds: 1 }
+    ];
 
-    const remainingDays = days % 365;
-    const remainingHours = hours % 24;
-    const remainingMinutes = minutes % 60;
-    const remainingSeconds = seconds % 60;
+    let remaining = Math.floor(secs);
+    const parts = [];
 
-    const parts: string[] = [];
-
-    if (years > 0) {
-        parts.push(`${years}y`);
+    for (const unit of units) {
+        if (remaining <= 0) break;
+        const value = Math.floor(remaining / unit.seconds);
+        if (value > 0) {
+            parts.push(`${value}${unit.name}`);
+            remaining -= value * unit.seconds;
+        }
     }
-    if (remainingDays > 0) {
-        parts.push(`${remainingDays}M`);
-    }
-    if (remainingHours > 0) {
-        parts.push(`${remainingHours}d`);
-    }
-    if (remainingMinutes > 0) {
-        parts.push(`${remainingMinutes}h`);
-    }
-    if (remainingSeconds > 0) {
-        parts.push(`${remainingSeconds}m`);
-    }
-    if (parts.length === 0) {
-        return '0s';
-    }
-
-    return parts.join(' ');
+    return parts.slice(0, partLen).join(' ');
 }

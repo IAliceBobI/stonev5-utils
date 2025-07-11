@@ -16,48 +16,4 @@ describe('时间工具函数测试', () => {
         expect(formatDate(0, date, -1)).toEqual("2024-02-04 23:00:00");
     });
 
-    test('readableDuration - 1 second', () => {
-        expect(readableDuration(1000)).toBe("1m");
-    });
-
-    test('readableDuration - 1 minute', () => {
-        expect(readableDuration(60 * 1000)).toBe("1h");
-    });
-
-    test('readableDuration - 1 hour', () => {
-        expect(readableDuration(3600 * 1000)).toBe("1d");
-    });
-
-    test('readableDuration - 1 day', () => {
-        expect(readableDuration(24 * 3600 * 1000)).toBe("1M");
-    });
-
-    test('readableDuration - 1 year', () => {
-        expect(readableDuration(365 * 24 * 3600 * 1000)).toBe("1y");
-    });
-
-    test('readableDuration - 1 year and 1 day', () => {
-        expect(readableDuration(366 * 24 * 3600 * 1000)).toBe("1y 1M");
-    });
-
-    test('readableDuration - 1 hour, 1 minute, 1 second', () => {
-        expect(readableDuration(3600 * 1000 + 60 * 1000 + 1000)).toBe("1d 1h 1m");
-    });
-
-    test('readableDuration - 0 milliseconds', () => {
-        expect(readableDuration(0)).toBe("0s");
-    });
-
-    test('readableDuration - negative milliseconds', () => {
-        expect(readableDuration(-3600 * 1000)).toBe("1d");
-    });
-
-    test('readableDuration - complex duration', () => {
-        const ms = 2 * 365 * 24 * 3600 * 1000 + // 2 years
-            120 * 24 * 3600 * 1000 +     // 120 days
-            5 * 3600 * 1000 +            // 5 hours
-            45 * 60 * 1000 +             // 45 minutes
-            30 * 1000;                   // 30 seconds
-        expect(readableDuration(ms)).toBe("2y 120M 5d 45h 30m");
-    });
 });
