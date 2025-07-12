@@ -58,12 +58,11 @@ export function validateNum(num: any, v: number) {
 }
 
 export function objOverrideNull<T extends object>(includeNull: T, defaultValue: Partial<T>): T {
-    const result = { ...includeNull };
     Object.keys(defaultValue).forEach((key) => {
         const typedKey = key as keyof T;
-        if (result[typedKey] == null) {
-            result[typedKey] = defaultValue[typedKey] as T[keyof T];
+        if (includeNull[typedKey] == null) {
+            includeNull[typedKey] = defaultValue[typedKey] as T[keyof T];
         }
     });
-    return result;
+    return includeNull;
 }
