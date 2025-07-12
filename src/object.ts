@@ -57,12 +57,12 @@ export function validateNum(num: any, v: number) {
     return v;
 }
 
-export function overrideNullOrUndefined<T extends object>(source: T, target: Partial<T>): T {
-    const result = { ...source };
-    Object.keys(target).forEach((key) => {
+export function objOverrideNull<T extends object>(includeNull: T, defaultValue: Partial<T>): T {
+    const result = { ...includeNull };
+    Object.keys(defaultValue).forEach((key) => {
         const typedKey = key as keyof T;
-        if (result[typedKey] === null || result[typedKey] === undefined) {
-            result[typedKey] = target[typedKey] as T[keyof T];
+        if (result[typedKey] == null) {
+            result[typedKey] = defaultValue[typedKey] as T[keyof T];
         }
     });
     return result;
