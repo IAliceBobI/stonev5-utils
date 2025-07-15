@@ -9,6 +9,7 @@ export * from './parallel';
 export * from './rand';
 export * from './string';
 export * from './time';
+export * from './functional';
 
 export async function copy2clipboard(text: string) {
     return navigator.clipboard.writeText(text)
