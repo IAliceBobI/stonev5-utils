@@ -14,8 +14,8 @@ export function oneDiv(...divs: HTMLElement[]) {
 }
 
 
-export function removeHTMLFuckChar8203(div: HTMLElement) {
-    removeHTMLFuckChar(div, "8203")
+export function removeHTMLFuckChar8203(div: HTMLElement, maxIter = 10) {
+    removeHTMLFuckChar(div, "8203", maxIter)
 }
 
 export function removeHTMLFuckChar(div: HTMLElement, c: string, maxIter = 10) {
