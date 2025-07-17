@@ -14,7 +14,7 @@ export function oneDiv(...divs: HTMLElement[]) {
 }
 
 
-export function removeDiv8203(div: HTMLElement) {
+export function removeDivFuckChar8203(div: HTMLElement) {
     removeDivFuckChar(div, "8203")
 }
 
