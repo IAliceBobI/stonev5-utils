@@ -18,10 +18,9 @@ export function removeHTMLFuckChar8203(div: HTMLElement) {
     removeHTMLFuckChar(div, "8203")
 }
 
-export function removeHTMLFuckChar(div: HTMLElement, c: string) {
+export function removeHTMLFuckChar(div: HTMLElement, c: string, maxIter = 10) {
     let flag = true;
-    let i = 10
-    while (flag && --i > 0) {
+    while (flag && --maxIter > 0) {
         flag = false;
         for (const e of div.childNodes) {
             if (strCode(e.textContent ?? "") == c) {
