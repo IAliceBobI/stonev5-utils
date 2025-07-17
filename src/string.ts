@@ -111,3 +111,11 @@ export function sanitizePathSegment(segment: string): string {
     return segment.replace(ILLEGAL_CHARS_REGEX, '_'); // 替换为下划线
 }
 
+export function strCodes(str: string) {
+    let codes = []
+    for (let i = 0; i < str.length; i++) {
+        codes.push(`${str.charCodeAt(i)}${str.charAt(i)}`)
+    }
+    return codes.join(" ")
+}
+
