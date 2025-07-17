@@ -14,11 +14,11 @@ export function oneDiv(...divs: HTMLElement[]) {
 }
 
 
-export function removeDivFuckChar8203(div: HTMLElement) {
-    removeDivFuckChar(div, "8203")
+export function removeHTMLFuckChar8203(div: HTMLElement) {
+    removeHTMLFuckChar(div, "8203")
 }
 
-export function removeDivFuckChar(div: HTMLElement, c: string) {
+export function removeHTMLFuckChar(div: HTMLElement, c: string) {
     let flag = true;
     let i = 10
     while (flag && --i > 0) {
