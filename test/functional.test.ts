@@ -1,5 +1,76 @@
 import '../src/functional'; // 假设你的数组扩展方法在这个文件中
 
+describe('ArrayIterator.prototype.toArray', () => {
+  // 基础功能测试
+  test('should convert iterator to array with all elements', () => {
+    const arr = [1, 2, 3, 4, 5];
+    const iterator = arr.values();
+
+    const result = iterator.toArray();
+
+    // 使用断言而不是console.log进行断言
+    expect(result).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  // 测试用例
+  test('should handle mapped iterators correctly', () => {
+    const arr = [1, 2, 3, 4, 5];
+    const mappedIterator = arr.map(x => x * 2).values();
+
+    const result = mappedIterator.toArray();
+
+    expect(result).toEqual([2, 4, 6, 8, 10]);
+  });
+
+  // 空数组测试
+  test('should return empty array for empty iterator', () => {
+    const arr: number[] = [];
+    const iterator = arr.values();
+
+    const result = iterator.toArray();
+
+    expect(result).toEqual([]);
+    expect(result.length).toBe(0);
+  });
+
+  // 迭代器耗尽测试
+  test('should exhaust the iterator after conversion', () => {
+    const arr = [1, 2, 3];
+    const iterator = arr.values();
+
+    // 第一次转换
+    const firstResult = iterator.toArray();
+    expect(firstResult).toEqual([1, 2, 3]);
+
+    // 迭代器已耗尽，再次调用应返回空数组
+    const secondResult = iterator.toArray();
+    expect(secondResult).toEqual([]);
+  });
+
+  // 字符串数组测试
+  test('should work with string arrays', () => {
+    const arr = ['a', 'b', 'c'];
+    const iterator = arr.values();
+
+    const result = iterator.toArray();
+
+    expect(result).toEqual(['a', 'b', 'c']);
+  });
+
+  // 对象数组测试
+  test('should work with object arrays', () => {
+    const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+    const iterator = arr.values();
+
+    const result = iterator.toArray();
+
+    expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+    // 验证引用相等性
+    expect(result[0]).toBe(arr[0]);
+  });
+});
+
+
 // 测试asyncMap
 describe('asyncMap', () => {
   test('基础用法: 处理同步回调', async () => {

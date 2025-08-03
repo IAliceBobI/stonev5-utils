@@ -13,7 +13,21 @@ declare global {
             fn?: (value: T, index: number) => V
         ): T[];
     }
+    interface ArrayIterator<T> {
+        toArray(): T[];
+    }
 }
+
+const arrayIteratorPrototype = Object.getPrototypeOf([][Symbol.iterator]());
+arrayIteratorPrototype.toArray = function <T>(this: ArrayIterator<T>): T[] {
+    const result: T[] = [];
+    let next;
+    // 遍历迭代器并收集所有值
+    while (!(next = this.next()).done) {
+        result.push(next.value);
+    }
+    return result;
+};
 
 async function asyncMapImpl<T, U, K = Awaited<U>>(
     iterable: AsyncIterable<T> | Iterable<T | Promise<T>>,
