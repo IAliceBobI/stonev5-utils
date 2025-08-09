@@ -70,7 +70,6 @@ describe('ArrayIterator.prototype.toArray', () => {
   });
 });
 
-
 // 测试asyncMap
 describe('asyncMap', () => {
   test('基础用法: 处理同步回调', async () => {
@@ -91,11 +90,31 @@ describe('asyncMap', () => {
 
   test('使用postMap处理结果', async () => {
     const a = [1, 2, 3, 4];
+    const result1 = await a.asyncMap(num => num * 2).then(a => a.map(v => v + 1))
     const result = await a.asyncMap(
       num => num * 2,
       (value) => value + 1
     );
     expect(result).toStrictEqual([3, 5, 7, 9]);
+    expect(result1).toStrictEqual([3, 5, 7, 9]);
+  });
+
+  test('使用postMap处理结果2', async () => {
+    const a = [1, 2, 3, 4];
+    const result = await a.asyncMap(
+      num => {
+        return { num, v: num * 2 }
+      },
+      ({ num, v }) => {
+        return { num, v: v + 1 }
+      }
+    );
+    expect(result).toStrictEqual([
+      { num: 1, v: 3 },
+      { num: 2, v: 5 },
+      { num: 3, v: 7 },
+      { num: 4, v: 9 },
+    ]);
   });
 
   test('空数组: 返回空数组', async () => {
@@ -178,3 +197,183 @@ describe('uniq', () => {
     ]);
   });
 });
+
+describe('thenMap方法', () => {
+  test('应该正确映射数组中的每个元素', async () => {
+    const result = await Promise.resolve([1, 2, 3]).thenMap(num => num * 2);
+    expect(result).toEqual([2, 4, 6]);
+  });
+
+  test('应该正确处理字符串数组', async () => {
+    const result = await Promise.resolve(['a', 'b', 'c']).thenMap(str => str.toUpperCase());
+    expect(result).toEqual(['A', 'B', 'C']);
+  });
+
+  test('应该正确处理对象数组', async () => {
+    const users = [
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 30 }
+    ];
+
+    const result = await Promise.resolve(users).thenMap(user => user.name);
+    expect(result).toEqual(['Alice', 'Bob']);
+  });
+
+  test('当Promise解析值不是数组时应该抛出错误', async () => {
+    await expect(
+      Promise.resolve('not an array').thenMap(value => value)
+    ).rejects.toThrow('Promise resolved value is not an array');
+  });
+
+  test('应该正确处理空数组', async () => {
+    const result = await Promise.resolve([]).thenMap(item => item);
+    expect(result).toEqual([]);
+  });
+
+  test('映射函数应该接收正确的索引和数组参数', async () => {
+    const mockCallback = jest.fn((value, index, array) => value);
+    const testArray = [10, 20, 30];
+
+    await Promise.resolve(testArray).thenMap(mockCallback);
+
+    expect(mockCallback).toHaveBeenCalledTimes(3);
+    expect(mockCallback).toHaveBeenNthCalledWith(1, 10, 0, testArray);
+    expect(mockCallback).toHaveBeenNthCalledWith(2, 20, 1, testArray);
+    expect(mockCallback).toHaveBeenNthCalledWith(3, 30, 2, testArray);
+  });
+
+  test('应该处理映射函数返回的Promise', async () => {
+    const result = await Promise.resolve([1, 2, 3])
+      .thenMap(num => Promise.resolve(num * 3));
+
+    expect(result).toEqual([3, 6, 9]);
+  });
+
+  test('当原始Promise被拒绝时应该传播错误', async () => {
+    const errorMessage = 'Something went wrong';
+    await expect(
+      Promise.reject(new Error(errorMessage)).thenMap(value => value)
+    ).rejects.toThrow(errorMessage);
+  });
+});
+
+
+describe('Array.chunks', () => {
+  // 测试正常分割情况
+  test('should split array into chunks of specified size', () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    expect(arr.chunks(3)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+    expect(arr.chunks(2)).toEqual([[1, 2], [3, 4], [5, 6], [7, 8], [9]]);
+  });
+
+  // 测试空数组
+  test('should return empty array for empty input', () => {
+    const arr: number[] = [];
+    expect(arr.chunks(5)).toEqual([]);
+    expect(arr.chunks(1)).toEqual([]);
+  });
+
+  // 测试数组长度小于 chunk 大小
+  test('should return single chunk when array length is less than size', () => {
+    const arr = ['a', 'b', 'c'];
+    expect(arr.chunks(5)).toEqual([['a', 'b', 'c']]);
+  });
+
+  // 测试 chunk 大小等于数组长度
+  test('should return single chunk when size equals array length', () => {
+    const arr = [10, 20, 30];
+    expect(arr.chunks(3)).toEqual([[10, 20, 30]]);
+  });
+
+  // 测试非整数数组
+  test('should work with non-number arrays', () => {
+    const arr = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
+    expect(arr.chunks(2)).toEqual([
+      [{ id: 1 }, { id: 2 }],
+      [{ id: 3 }, { id: 4 }]
+    ]);
+  });
+
+  // 测试错误输入（零或负数）
+  test('should throw error for invalid size (zero or negative)', () => {
+    const arr = [1, 2, 3];
+
+    expect(() => arr.chunks(0)).toThrow('Chunk size must be a positive number');
+    expect(() => arr.chunks(-5)).toThrow('Chunk size must be a positive number');
+    expect(() => arr.chunks(NaN)).toThrow('Chunk size must be a positive number');
+  });
+});
+
+describe('Array.shuffle (in-place)', () => {
+  // 测试基本功能：元素相同但顺序可能不同，且原数组被修改
+  test('should shuffle elements in place and return the same array', () => {
+    const arr = [1, 2, 3, 4, 5];
+    const original = [...arr]; // 保存原始状态
+    const result = arr.shuffle();
+
+    // 返回的数组应该和原数组是同一个引用
+    expect(result).toBe(arr);
+
+    // 长度保持不变
+    expect(arr.length).toBe(original.length);
+
+    // 元素集合应该相同（排序后比较）
+    expect(arr.slice().sort()).toEqual(original.sort());
+
+    // 原数组应该被修改（大概率与原始状态不同）
+    expect(arr).not.toEqual(original);
+  });
+
+  // 测试空数组
+  test('should handle empty array without changes', () => {
+    const arr: number[] = [];
+    const result = arr.shuffle();
+
+    // 引用相同
+    expect(result).toBe(arr);
+    // 仍然为空
+    expect(arr).toEqual([]);
+  });
+
+  // 测试单元素数组（无法打乱，原数组保持不变）
+  test('should not change array with single element', () => {
+    const arr = ['only element'];
+    const original = [...arr];
+    const result = arr.shuffle();
+
+    expect(result).toBe(arr);
+    expect(arr).toEqual(original); // 单元素无法打乱，保持原样
+  });
+
+  // 测试多次调用随机性（概率性测试）
+  test('should produce different orders on multiple calls', () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7];
+    // 第一次洗牌
+    const firstShuffle = [...arr.shuffle()];
+    // 第二次洗牌
+    const secondShuffle = [...arr.shuffle()];
+
+    // 两次洗牌结果大概率不同
+    expect(firstShuffle).not.toEqual(secondShuffle);
+  });
+
+  // 测试对象数组（验证引用不变，仅顺序改变）
+  test('should preserve object references while shuffling', () => {
+    const obj1 = { id: 1 };
+    const obj2 = { id: 2 };
+    const obj3 = { id: 3 };
+    const arr = [obj1, obj2, obj3];
+
+    const result = arr.shuffle();
+
+    // 引用相同
+    expect(result).toBe(arr);
+    // 元素引用不变
+    expect(arr).toContain(obj1);
+    expect(arr).toContain(obj2);
+    expect(arr).toContain(obj3);
+    // 元素数量不变
+    expect(arr.length).toBe(3);
+  });
+});
+
