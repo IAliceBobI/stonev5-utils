@@ -11,8 +11,9 @@ declare global {
         uniq<V = T>(fn?: (value: T, index: number) => V): T[];
         chunks(size: number): T[][];
         shuffle(): T[];
-        toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V>;
+        toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
+        mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
     }
     interface ArrayIterator<T> {
         toArray(): T[];
@@ -28,16 +29,37 @@ declare global {
     }
 }
 
-Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index?: number) => [K, V]): Map<K, V> {
-    const map = new Map<K, V>();
+Array.prototype.mapfilter = function <T, U>(
+    this: T[],
+    callback: (value: T, index?: number) => U | null | undefined
+): U[] {
+    const result: U[] = [];
+    for (let i = 0; i < this.length; i++) {
+        const mapped = callback(this[i], i);
+        // 只保留非null和非undefined的值
+        if (mapped !== null && mapped !== undefined) {
+            result.push(mapped);
+        }
+    }
+    return result;
+};
+
+Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index?: number) => [K, V] | null | undefined): Map<K, V[]> {
+    const map = new Map<K, V[]>();
     for (let i = 0; i < this.length; i++) {
         const ret = callback(this[i], i);
-        if (ret != null) {
-            map.set(ret[0], ret[1]);
+        if (ret?.length !== 2) continue;
+        const [key, value] = ret;
+        // 检查是否已有该键，如果有则追加到数组，没有则创建新数组
+        if (map.has(key)) {
+            map.get(key)!.push(value);
+        } else {
+            map.set(key, [value]);
         }
     }
     return map;
 };
+
 
 Array.prototype.toSet = function <K, T>(this: T[], callback: (value: T, index?: number) => K): Set<K> {
     const set = new Set<K>();
