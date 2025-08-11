@@ -51,11 +51,12 @@ Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index
         if (ret?.length !== 2) continue;
         const [key, value] = ret;
         // 检查是否已有该键，如果有则追加到数组，没有则创建新数组
-        if (map.has(key)) {
-            map.get(key)!.push(value);
-        } else {
-            map.set(key, [value]);
+        let arr = map.get(key);
+        if (arr == null) {
+            arr = [];
+            map.set(key, arr);
         }
+        arr.push(value);
     }
     return map;
 };
