@@ -377,3 +377,112 @@ describe('Array.shuffle (in-place)', () => {
   });
 });
 
+describe('Array.prototype.toMap', () => {
+  const testData = [
+    { id: 1, name: 'Alice', age: 25 },
+    { id: 2, name: 'Bob', age: 30 },
+    { id: 3, name: 'Charlie', age: 35 },
+  ];
+
+  test('应该将数组正确转换为 Map', () => {
+    const result = testData.toMap(item => [item.id, item.name]);
+
+    expect(result).toBeInstanceOf(Map);
+    expect(result.size).toBe(3);
+    expect(result.get(1)).toBe('Alice');
+    expect(result.get(2)).toBe('Bob');
+    expect(result.get(3)).toBe('Charlie');
+  });
+
+  test('应该忽略键为 null 或 undefined 的项', () => {
+    const result = testData.toMap((item, index) => {
+      // 让第二个元素的键为 null
+      return index === 1 ? [null as unknown as number, item.name] : [item.id, item.name];
+    });
+
+    expect(result.size).toBe(2);
+    expect(result.has(1)).toBe(true);
+    expect(result.has(2)).toBe(false); // 被忽略
+    expect(result.has(3)).toBe(true);
+  });
+
+  test('应该处理重复键，保留最后一个值', () => {
+    const duplicateData = [...testData, { id: 1, name: 'David', age: 40 }];
+    const result = duplicateData.toMap(item => [item.id, item.name]);
+
+    expect(result.size).toBe(3);
+    expect(result.get(1)).toBe('David'); // 最后一个值覆盖前面的
+  });
+
+  test('回调函数应该接收正确的参数', () => {
+    // 为 mock 函数指定明确的返回类型，确保返回 [K, V] 元组
+    const callback = jest.fn<[number, string], [typeof testData[0], number]>(
+      (item, index) => [item.id, item.name]
+    );
+
+    testData.toMap(callback);
+
+    expect(callback).toHaveBeenCalledTimes(3);
+    expect(callback).toHaveBeenNthCalledWith(1, testData[0], 0);
+    expect(callback).toHaveBeenNthCalledWith(2, testData[1], 1);
+    expect(callback).toHaveBeenNthCalledWith(3, testData[2], 2);
+  });
+
+  test('空数组应该返回空 Map', () => {
+    const result = [].toMap(() => [1, 'test']);
+    expect(result).toBeInstanceOf(Map);
+    expect(result.size).toBe(0);
+  });
+});
+
+describe('Array.prototype.toSet', () => {
+  const testData = [1, 2, 3, 4, 5];
+
+  test('应该将数组正确转换为 Set', () => {
+    const result = testData.toSet(item => item * 2);
+
+    expect(result).toBeInstanceOf(Set);
+    expect(result.size).toBe(5);
+    expect(result.has(2)).toBe(true);
+    expect(result.has(4)).toBe(true);
+    expect(result.has(10)).toBe(true);
+  });
+
+  test('应该自动去重', () => {
+    const duplicateData = [1, 2, 2, 3, 3, 3];
+    const result = duplicateData.toSet(item => item);
+
+    expect(result.size).toBe(3);
+    expect(result.has(1)).toBe(true);
+    expect(result.has(2)).toBe(true);
+    expect(result.has(3)).toBe(true);
+  });
+
+  test('应该忽略值为 null 或 undefined 的项', () => {
+    const result = testData.toSet((item, index) => {
+      // 让偶数索引的值为 null
+      return index % 2 === 0 ? null as unknown as number : item;
+    });
+
+    expect(result.size).toBe(2);
+    expect(result.has(2)).toBe(true);
+    expect(result.has(4)).toBe(true);
+  });
+
+  test('回调函数应该接收正确的参数', () => {
+    const callback = jest.fn(item => item);
+    testData.toSet(callback);
+
+    expect(callback).toHaveBeenCalledTimes(5);
+    expect(callback).toHaveBeenNthCalledWith(1, 1, 0);
+    expect(callback).toHaveBeenNthCalledWith(2, 2, 1);
+    expect(callback).toHaveBeenNthCalledWith(3, 3, 2);
+  });
+
+  test('空数组应该返回空 Set', () => {
+    const result = [].toSet(() => 'test');
+    expect(result).toBeInstanceOf(Set);
+    expect(result.size).toBe(0);
+  });
+});
+

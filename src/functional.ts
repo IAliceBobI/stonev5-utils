@@ -11,6 +11,8 @@ declare global {
         uniq<V = T>(fn?: (value: T, index: number) => V): T[];
         chunks(size: number): T[][];
         shuffle(): T[];
+        toMap<K, V>(callback: (value: T, index: number) => [K, V]): Map<K, V>;
+        toSet<K>(callback: (value: T, index: number) => K): Set<K>;
     }
     interface ArrayIterator<T> {
         toArray(): T[];
@@ -25,6 +27,28 @@ declare global {
         ): Promise<U[]>;
     }
 }
+
+Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index: number) => [K, V]): Map<K, V> {
+    const map = new Map<K, V>();
+    for (let i = 0; i < this.length; i++) {
+        const [key, value] = callback(this[i], i);
+        if (key != null) {
+            map.set(key, value);
+        }
+    }
+    return map;
+};
+
+Array.prototype.toSet = function <K, T>(this: T[], callback: (value: T, index: number) => K): Set<K> {
+    const set = new Set<K>();
+    for (let i = 0; i < this.length; i++) {
+        const key = callback(this[i], i);
+        if (key != null) {
+            set.add(key)
+        }
+    }
+    return set;
+};
 
 Array.prototype.shuffle = function <T>(this: T[]): T[] {
     const arr = this;
