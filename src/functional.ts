@@ -15,10 +15,7 @@ declare global {
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
         mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
     }
-    interface ArrayIterator<T> {
-        toArray(): T[];
-    }
-    interface MapIterator<T> {
+    interface Iterator<T> {
         toArray(): T[];
     }
     interface Promise<T> {
@@ -116,17 +113,7 @@ Promise.prototype.thenMap = async function <U, V>(
     });
 };
 
-Object.getPrototypeOf([][Symbol.iterator]()).toArray = function <T>(this: ArrayIterator<T>): T[] {
-    const result: T[] = [];
-    let next;
-    // 遍历迭代器并收集所有值
-    while (!(next = this.next()).done) {
-        result.push(next.value);
-    }
-    return result;
-};
-
-Object.getPrototypeOf(new Map()[Symbol.iterator]()).toArray = function <T>(this: MapIterator<T>): T[] {
+Object.getPrototypeOf([][Symbol.iterator]()).toArray = function <T>(this: Iterator<T>): T[] {
     const result: T[] = [];
     let next;
     // 遍历迭代器并收集所有值
