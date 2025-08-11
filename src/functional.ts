@@ -31,9 +31,9 @@ declare global {
 Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index: number) => [K, V]): Map<K, V> {
     const map = new Map<K, V>();
     for (let i = 0; i < this.length; i++) {
-        const [key, value] = callback(this[i], i);
-        if (key != null) {
-            map.set(key, value);
+        const ret = callback(this[i], i);
+        if (ret != null) {
+            map.set(ret[0], ret[1]);
         }
     }
     return map;
