@@ -27,7 +27,20 @@ declare global {
             ) => U
         ): Promise<U[]>;
     }
+    interface Map<K, V> {
+        getOr(key: K, defaultValue: V | (() => V)): V;
+    }
 }
+
+Map.prototype.getOr = function <K, V>(this: Map<K, V>, key: K, defaultValue: V | (() => V)): V {
+    if (this.has(key)) {
+        return this.get(key)!;
+    } else {
+        return typeof defaultValue === 'function'
+            ? (defaultValue as () => V)()
+            : defaultValue;
+    }
+};
 
 Array.prototype.mapfilter = function <T, U>(
     this: T[],
