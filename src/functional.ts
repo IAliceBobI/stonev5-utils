@@ -29,6 +29,7 @@ declare global {
     }
     interface Map<K, V> {
         getOr(key: K, defaultValue: V | (() => V)): V;
+        getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
 
@@ -39,6 +40,18 @@ Map.prototype.getOr = function <K, V>(this: Map<K, V>, key: K, defaultValue: V |
         return typeof defaultValue === 'function'
             ? (defaultValue as () => V)()
             : defaultValue;
+    }
+};
+
+Map.prototype.getSet = function <K, V>(this: Map<K, V>, key: K, defaultValue: V | (() => V)): V {
+    if (this.has(key)) {
+        return this.get(key)!;
+    } else {
+        const nv = typeof defaultValue === 'function'
+            ? (defaultValue as () => V)()
+            : defaultValue;
+        this.set(key, nv);
+        return nv;
     }
 };
 
