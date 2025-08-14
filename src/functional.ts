@@ -37,6 +37,7 @@ declare global {
             predicate: (value: T, index: number, array: T[]) => boolean,
             ...elements: T[]
         ): this;
+        sum<U>(fn?: (value: T, index: number, array: T[]) => U): number;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -55,6 +56,24 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.sum = function <T, U>(this: T[], fn?: (value: T, index: number, array: T[]) => U): number {
+    // 如果没有提供映射函数，默认使用元素本身
+    if (typeof fn !== 'function') {
+        return this.reduce((acc, value) => {
+            // 将元素转换为数字，非数字值将被视为0
+            const num = Number(value);
+            return acc + (isNaN(num) ? 0 : num);
+        }, 0);
+    }
+
+    // 如果提供了映射函数，先通过函数处理元素再求和
+    return this.reduce((acc, value, index, array) => {
+        const result = fn(value, index, array);
+        const num = Number(result);
+        return acc + (isNaN(num) ? 0 : num);
+    }, 0);
+};
 
 Array.prototype.insertBefore = function <T>(
     this: T[],
