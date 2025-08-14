@@ -12,6 +12,7 @@ declare global {
         chunks(size: number): T[][];
         shuffle(): T[];
         toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
+        toMapUniq<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
         mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
         swap(
@@ -231,6 +232,16 @@ Array.prototype.toMap = function <K, V, T>(this: T[], callback: (value: T, index
     return map;
 };
 
+Array.prototype.toMapUniq = function <K, V, T>(this: T[], callback: (value: T, index?: number) => [K, V] | null | undefined): Map<K, V> {
+    const map = new Map<K, V>();
+    for (let i = 0; i < this.length; i++) {
+        const ret = callback(this[i], i);
+        if (ret?.length !== 2) continue;
+        const [key, value] = ret;
+        map.set(key, value);
+    }
+    return map;
+};
 
 Array.prototype.toSet = function <K, T>(this: T[], callback: (value: T, index?: number) => K): Set<K> {
     const set = new Set<K>();
