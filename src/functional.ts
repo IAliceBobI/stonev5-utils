@@ -14,6 +14,7 @@ declare global {
         toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
         mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
+        swap(index1: number, index2: number): T[];
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -32,6 +33,24 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.swap = function <T>(this: T[], index1: number, index2: number): T[] {
+    // 检查索引是否有效，无效则直接返回
+    if (
+        index1 < 0 ||
+        index1 >= this.length ||
+        index2 < 0 ||
+        index2 >= this.length ||
+        index1 === index2  // 索引相同时也无需操作
+    ) {
+        return this;
+    }
+    const temp = this[index1];
+    this[index1] = this[index2];
+    this[index2] = temp;
+    return this;
+};
+
 
 Map.prototype.getOr = function <K, V>(this: Map<K, V>, key: K, defaultValue: V | (() => V)): V {
     if (this.has(key)) {
