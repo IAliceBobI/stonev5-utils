@@ -14,7 +14,17 @@ declare global {
         toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
         mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
-        swap(index1: number, index2: number): T[];
+        swap(index1: number, index2: number): this;
+        remove(predicate: (value: T, index: number, array: T[]) => boolean): this;
+        removeAll(predicate: (value: T, index: number, array: T[]) => boolean): this;
+        replace(
+            predicate: (value: T, index: number, array: T[]) => boolean,
+            replacement: T | ((value: T, index: number, array: T[]) => T)
+        ): this;
+        replaceAll(
+            predicate: (value: T, index: number, array: T[]) => boolean,
+            replacement: T | ((value: T, index: number, array: T[]) => T)
+        ): this;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -33,6 +43,65 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.replace = function <T>(
+    this: T[],
+    predicate: (value: T, index: number, array: T[]) => boolean,
+    replacement: T | ((value: T, index: number, array: T[]) => T)
+): T[] {
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i], i, this)) {
+            // 确定替换值（支持固定值或函数生成值）
+            const newValue = typeof replacement === 'function'
+                ? (replacement as (value: T, index: number, array: T[]) => T)(this[i], i, this)
+                : replacement;
+
+            this[i] = newValue;
+            break; // 只替换第一个匹配项
+        }
+    }
+    return this;
+};
+
+Array.prototype.replaceAll = function <T>(
+    this: T[],
+    predicate: (value: T, index: number, array: T[]) => boolean,
+    replacement: T | ((value: T, index: number, array: T[]) => T)
+): T[] {
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i], i, this)) {
+            // 确定替换值（支持固定值或函数生成值）
+            const newValue = typeof replacement === 'function'
+                ? (replacement as (value: T, index: number, array: T[]) => T)(this[i], i, this)
+                : replacement;
+
+            this[i] = newValue;
+        }
+    }
+    return this;
+};
+
+
+Array.prototype.remove = function <T>(this: T[], predicate: (value: T, index: number, array: T[]) => boolean): T[] {
+    // 查找第一个匹配的元素索引
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i], i, this)) {
+            this.splice(i, 1); // 删除找到的元素
+            break; // 只删除第一个匹配项
+        }
+    }
+    return this; // 支持链式调用
+};
+
+Array.prototype.removeAll = function <T>(this: T[], predicate: (value: T, index: number, array: T[]) => boolean): T[] {
+    // 从后往前遍历，避免删除元素后索引错乱
+    for (let i = this.length - 1; i >= 0; i--) {
+        if (predicate(this[i], i, this)) {
+            this.splice(i, 1); // 删除匹配的元素
+        }
+    }
+    return this; // 支持链式调用
+};
 
 Array.prototype.swap = function <T>(this: T[], index1: number, index2: number): T[] {
     // 检查索引是否有效，无效则直接返回
