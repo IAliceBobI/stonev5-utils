@@ -14,7 +14,10 @@ declare global {
         toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
         mapfilter<U>(callback: (value: T, index?: number) => U | null | undefined): U[];
-        swap(index1: number, index2: number): this;
+        swap(
+            index1: number | ((value: T, index: number, array: T[]) => boolean),
+            index2: number | ((value: T, index: number, array: T[]) => boolean)
+        ): this;
         remove(predicate: (value: T, index: number, array: T[]) => boolean): this;
         removeAll(predicate: (value: T, index: number, array: T[]) => boolean): this;
         replace(
@@ -121,7 +124,6 @@ Array.prototype.replaceAll = function <T>(
     return this;
 };
 
-
 Array.prototype.remove = function <T>(this: T[], predicate: (value: T, index: number, array: T[]) => boolean): T[] {
     // 查找第一个匹配的元素索引
     for (let i = 0; i < this.length; i++) {
@@ -143,23 +145,37 @@ Array.prototype.removeAll = function <T>(this: T[], predicate: (value: T, index:
     return this; // 支持链式调用
 };
 
-Array.prototype.swap = function <T>(this: T[], index1: number, index2: number): T[] {
-    // 检查索引是否有效，无效则直接返回
-    if (
-        index1 < 0 ||
-        index1 >= this.length ||
-        index2 < 0 ||
-        index2 >= this.length ||
-        index1 === index2  // 索引相同时也无需操作
-    ) {
-        return this;
-    }
-    const temp = this[index1];
-    this[index1] = this[index2];
-    this[index2] = temp;
-    return this;
-};
+Array.prototype.swap = function <T>(
+    this: T[],
+    index1: number | ((value: T, index: number, array: T[]) => boolean),
+    index2: number | ((value: T, index: number, array: T[]) => boolean)
+): T[] {
+    // 解析第一个索引
+    const i = typeof index1 === 'function'
+        ? this.findIndex(index1)
+        : index1;
 
+    // 解析第二个索引
+    const j = typeof index2 === 'function'
+        ? this.findIndex(index2)
+        : index2;
+
+    // 检查索引有效性
+    if (
+        i < 0 || i >= this.length ||
+        j < 0 || j >= this.length ||
+        i === j // 索引相同无需交换
+    ) {
+        return this; // 无效索引时不执行任何操作
+    }
+
+    // 执行交换
+    const temp = this[i];
+    this[i] = this[j];
+    this[j] = temp;
+
+    return this; // 支持链式调用
+};
 
 Map.prototype.getOr = function <K, V>(this: Map<K, V>, key: K, defaultValue: V | (() => V)): V {
     if (this.has(key)) {
