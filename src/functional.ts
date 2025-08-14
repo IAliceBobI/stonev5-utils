@@ -25,6 +25,14 @@ declare global {
             predicate: (value: T, index: number, array: T[]) => boolean,
             replacement: T | ((value: T, index: number, array: T[]) => T)
         ): this;
+        insertBefore(
+            predicate: (value: T, index: number, array: T[]) => boolean,
+            ...elements: T[]
+        ): this;
+        insertAfter(
+            predicate: (value: T, index: number, array: T[]) => boolean,
+            ...elements: T[]
+        ): this;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -43,6 +51,38 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.insertBefore = function <T>(
+    this: T[],
+    predicate: (value: T, index: number, array: T[]) => boolean,
+    ...elements: T[]
+): T[] {
+    // 查找第一个匹配的元素索引
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i], i, this)) {
+            // 在找到的索引位置插入元素（splice会自动移动后续元素）
+            this.splice(i, 0, ...elements);
+            break; // 只插入一次
+        }
+    }
+    return this;
+};
+
+Array.prototype.insertAfter = function <T>(
+    this: T[],
+    predicate: (value: T, index: number, array: T[]) => boolean,
+    ...elements: T[]
+): T[] {
+    // 查找第一个匹配的元素索引
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i], i, this)) {
+            // 在找到的索引位置后一位插入元素
+            this.splice(i + 1, 0, ...elements);
+            break; // 只插入一次
+        }
+    }
+    return this;
+};
 
 Array.prototype.replace = function <T>(
     this: T[],
