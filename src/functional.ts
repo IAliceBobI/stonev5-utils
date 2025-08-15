@@ -38,6 +38,7 @@ declare global {
             ...elements: T[]
         ): this;
         sum<U>(fn?: (value: T, index: number, array: T[]) => U): number;
+        extend(...items: T[]): this;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -56,6 +57,11 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.extend = function <T>(this: T[], ...items: T[]): T[] {
+    this.push(...items);
+    return this;
+};
 
 Array.prototype.sum = function <T, U>(this: T[], fn?: (value: T, index: number, array: T[]) => U): number {
     // 如果没有提供映射函数，默认使用元素本身
