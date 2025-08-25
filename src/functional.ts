@@ -39,6 +39,7 @@ declare global {
         ): this;
         sum<U>(fn?: (value: T, index: number, array: T[]) => U): number;
         extend(...items: T[]): this;
+        atOr(index: number, defaultValue: T | (() => T)): T;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -57,6 +58,21 @@ declare global {
         getSet(key: K, defaultValue: V | (() => V)): V;
     }
 }
+
+Array.prototype.atOr = function <T>(this: T[], index: number, defaultValue: T | (() => T)): T {
+    // 处理负索引（从数组末尾开始计数）
+    const actualIndex = index < 0 ? this.length + index : index;
+
+    // 检查索引是否有效
+    if (actualIndex >= 0 && actualIndex < this.length) {
+        return this[actualIndex];
+    }
+
+    // 返回默认值（如果是函数则执行它）
+    return typeof defaultValue === 'function'
+        ? (defaultValue as () => T)()
+        : defaultValue;
+};
 
 Array.prototype.extend = function <T>(this: T[], ...items: T[]): T[] {
     this.push(...items);
