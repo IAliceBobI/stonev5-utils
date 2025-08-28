@@ -58,8 +58,61 @@ declare global {
     interface Map<K, V> {
         getOr(key: K, defaultValue: V | (() => V)): V;
         getSet(key: K, defaultValue: V | (() => V)): V;
+        mapUniq<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B>;
+        map<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B[]>;
+        mapMkUniq<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B>;
+        mapMk<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]>;
     }
 }
+
+Map.prototype.mapUniq = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B> {
+    const result = new Map<A, B>();
+    for (const [key, value] of this) {
+        const [newKey, newValue] = callback(key, value, this);
+        result.set(newKey, newValue); // 重复键会被覆盖
+    }
+    return result;
+};
+
+Map.prototype.map = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B[]> {
+    const result = new Map<A, B[]>();
+    for (const [key, value] of this) {
+        const [newKey, newValue] = callback(key, value, this);
+        if (result.has(newKey)) {
+            result.get(newKey)!.push(newValue);
+        } else {
+            result.set(newKey, [newValue]);
+        }
+    }
+    return result;
+};
+
+Map.prototype.mapMkUniq = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B> {
+    const result = new Map<A, B>();
+    for (const [key, value] of this) {
+        const [newKeys, newValue] = callback(key, value, this);
+        newKeys.forEach(k => {
+            result.set(k, newValue); // 重复键会被覆盖
+        });
+    }
+    return result;
+};
+
+Map.prototype.mapMk = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]> {
+    const result = new Map<A, B[]>();
+    for (const [key, value] of this) {
+        const [newKeys, newValue] = callback(key, value, this);
+        newKeys.forEach(k => {
+            if (result.has(k)) {
+                result.get(k)!.push(newValue);
+            } else {
+                result.set(k, [newValue]);
+            }
+        });
+    }
+    return result;
+};
+
 
 Array.prototype.atOr = function <T>(this: T[], index: number, defaultValue: T | (() => T)): T {
     // 处理负索引（从数组末尾开始计数）
@@ -322,7 +375,6 @@ Array.prototype.toMapMkUniq = function <K, V, T>(this: T[], callback: (value: T,
     }
     return map;
 };
-
 
 Array.prototype.toSet = function <K, T>(this: T[], callback: (value: T, index?: number) => K): Set<K> {
     const set = new Set<K>();
