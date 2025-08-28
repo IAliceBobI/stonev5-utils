@@ -1,6 +1,6 @@
 {
   "name": "stonev5-utils",
-  "version": "1.0.86",
+  "version": "1.0.87",
   "description": "all my utils here",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
