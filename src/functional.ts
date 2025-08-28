@@ -113,7 +113,6 @@ Map.prototype.mapMk = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, 
     return result;
 };
 
-
 Array.prototype.atOr = function <T>(this: T[], index: number, defaultValue: T | (() => T)): T {
     // 处理负索引（从数组末尾开始计数）
     const actualIndex = index < 0 ? this.length + index : index;
