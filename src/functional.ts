@@ -11,6 +11,8 @@ declare global {
         uniq<V = T>(fn?: (value: T, index: number) => V): T[];
         chunks(size: number): T[][];
         shuffle(): T[];
+        toMapMk<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V[]>;
+        toMapMkUniq<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V>;
         toMap<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V[]>;
         toMapUniq<K, V>(callback: (value: T, index?: number) => [K, V]): Map<K, V>;
         toSet<K>(callback: (value: T, index?: number) => K): Set<K>;
@@ -283,6 +285,44 @@ Array.prototype.toMapUniq = function <K, V, T>(this: T[], callback: (value: T, i
     }
     return map;
 };
+
+Array.prototype.toMapMk = function <K, V, T>(this: T[], callback: (value: T, index?: number) => [K[], V] | null | undefined): Map<K, V[]> {
+    const map = new Map<K, V[]>();
+    for (let i = 0; i < this.length; i++) {
+        const ret = callback(this[i], i);
+        // 检查回调返回值是否有效
+        if (!ret || ret.length !== 2 || !Array.isArray(ret[0])) continue;
+
+        const [keys, value] = ret;
+        // 遍历键数组，为每个键添加值
+        for (const key of keys) {
+            let arr = map.get(key);
+            if (arr == null) {
+                arr = [];
+                map.set(key, arr);
+            }
+            arr.push(value);
+        }
+    }
+    return map;
+};
+
+Array.prototype.toMapMkUniq = function <K, V, T>(this: T[], callback: (value: T, index?: number) => [K[], V] | null | undefined): Map<K, V> {
+    const map = new Map<K, V>();
+    for (let i = 0; i < this.length; i++) {
+        const ret = callback(this[i], i);
+        // 检查回调返回值是否有效
+        if (!ret || ret.length !== 2 || !Array.isArray(ret[0])) continue;
+
+        const [keys, value] = ret;
+        // 遍历键数组，为每个键设置值（后面的会覆盖前面的）
+        for (const key of keys) {
+            map.set(key, value);
+        }
+    }
+    return map;
+};
+
 
 Array.prototype.toSet = function <K, T>(this: T[], callback: (value: T, index?: number) => K): Set<K> {
     const set = new Set<K>();
