@@ -10,7 +10,7 @@ declare global {
         ): Promise<Awaited<K>[]>;
         uniq<V = T>(fn?: (value: T, index: number) => V): T[];
         chunks(size: number): T[][];
-        group<U>(callback: (value: T, index: number, array: T[]) => U, shouldSort: boolean): T[][];
+        group<U>(callback: (value: T, index: number, array: T[]) => U, shouldSort?: boolean): T[][];
         shuffle(): T[];
         toMapMk<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V[]>;
         toMapMkUniq<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V>;
@@ -66,7 +66,7 @@ declare global {
     }
 }
 
-Array.prototype.group = function <T, U>(this: T[], callback: (value: T, index: number, array: T[]) => U, shouldSort: boolean = true): T[][] {
+Array.prototype.group = function <T, U>(this: T[], callback: (value: T, index: number, array: T[]) => U, shouldSort = true): T[][] {
     // 创建一个映射表存储分组结果
     const groups = new Map<U, T[]>();
 
