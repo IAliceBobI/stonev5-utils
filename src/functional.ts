@@ -43,6 +43,7 @@ declare global {
         sum<U>(fn?: (value: T, index: number, array: T[]) => U): number;
         extend(...items: T[]): this;
         atOr(index: number, defaultValue: T | (() => T)): T;
+        collapse(callback: (accumulator: T, current: T) => T): T[];
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -65,6 +66,19 @@ declare global {
         mapMk<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]>;
     }
 }
+
+Array.prototype.collapse = function <T>(this: T[], callback: (accumulator: T, current: T) => T): T[] {
+    if (this.length === 0) {
+        return this
+    }
+    // 以第一个元素作为初始值
+    let result = this[0];
+    // 从第二个元素开始，依次与当前结果进行计算
+    for (let i = 1; i < this.length; i++) {
+        result = callback(result, this[i]);
+    }
+    return [result];
+};
 
 Array.prototype.group = function <T, U>(this: T[], callback: (value: T, index: number, array: T[]) => U, shouldSort = true): T[][] {
     // 创建一个映射表存储分组结果
@@ -430,7 +444,7 @@ Array.prototype.shuffle = function <T>(this: T[]): T[] {
 Array.prototype.chunks = function <T>(this: T[], size: number): T[][] {
     // 验证输入：检查是否为有效数字且为正数
     if (typeof size !== 'number' || Number.isNaN(size) || size <= 0) {
-        throw new Error('Chunk size must be a positive number');
+        return [this]
     }
 
     const result: T[][] = [];
