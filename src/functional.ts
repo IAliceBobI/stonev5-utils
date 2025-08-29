@@ -10,7 +10,7 @@ declare global {
         ): Promise<Awaited<K>[]>;
         uniq<V = T>(fn?: (value: T, index: number) => V): T[];
         chunks(size: number): T[][];
-        group<U>(callback: (value: T, index: number, array: T[]) => U): T[][];
+        group<U>(callback: (value: T, index: number, array: T[]) => U, shouldSort: boolean): T[][];
         shuffle(): T[];
         toMapMk<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V[]>;
         toMapMkUniq<K, V>(callback: (value: T, index?: number) => [K[], V]): Map<K, V>;
@@ -66,32 +66,35 @@ declare global {
     }
 }
 
-Array.prototype.group = function<T, U>(this: T[], callback: (value: T, index: number, array: T[]) => U): T[][] {
-  // 创建一个映射表存储分组结果
-  const groups = new Map<U, T[]>();
-  
-  // 遍历数组，根据回调函数的返回值进行分组
-  this.forEach((item, index, array) => {
-    const key = callback(item, index, array);
-    // 如果该分组不存在，则创建一个新数组
-    if (!groups.has(key)) {
-      groups.set(key, []);
+Array.prototype.group = function <T, U>(this: T[], callback: (value: T, index: number, array: T[]) => U, shouldSort: boolean = true): T[][] {
+    // 创建一个映射表存储分组结果
+    const groups = new Map<U, T[]>();
+
+    // 遍历数组，根据回调函数的返回值进行分组
+    this.forEach((item, index, array) => {
+        const key = callback(item, index, array);
+        // 如果该分组不存在，则创建一个新数组
+        if (!groups.has(key)) {
+            groups.set(key, []);
+        }
+        // 将当前元素添加到对应的分组中
+        groups.get(key)!.push(item);
+    });
+
+    if (shouldSort) {
+        // 需要排序时，按键排序后返回
+        return Array.from(groups.keys())
+            .sort((a, b) => {
+                if (typeof a === 'number' && typeof b === 'number') {
+                    return a - b;
+                }
+                return String(a).localeCompare(String(b));
+            })
+            .map(key => groups.get(key)!);
+    } else {
+        // 不需要排序时，直接返回Map中的值（保持插入顺序）
+        return Array.from(groups.values());
     }
-    // 将当前元素添加到对应的分组中
-    groups.get(key)!.push(item);
-  });
-  
-  // 获取所有分组键并排序
-  const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
-    // 处理不同类型的比较
-    if (typeof a === 'number' && typeof b === 'number') {
-      return a - b;
-    }
-    return String(a).localeCompare(String(b));
-  });
-  
-  // 根据排序后的键返回对应的分组数组
-  return sortedKeys.map(key => groups.get(key)!);
 };
 
 Map.prototype.mapUniq = function <K, V, A, B>(this: Map<K, V>, callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B> {
