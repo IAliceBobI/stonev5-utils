@@ -2,6 +2,29 @@ export function into<U>(fn: () => U) {
     return fn();
 }
 
+export function objectToMap<V>(obj: Record<string, V>): Map<string, V> {
+    const map = new Map<string, V>();
+    // 处理字符串键
+    Object.entries(obj).forEach(([key, value]) => {
+        map.set(key, value);
+    });
+    return map;
+};
+
+export function objectEntriesWithKeyFilter<V>(obj: Record<string, V>, filter: (key: string) => boolean): [string, V][] {
+    const entries: [string, V][] = [];
+    if (typeof filter !== 'function') {
+        return entries
+    }
+    // 处理字符串键
+    Object.entries(obj).forEach(([key, value]) => {
+        if (filter(key)) {
+            entries.push([key, value]);
+        }
+    });
+    return entries;
+};
+
 declare global {
     interface Array<T> {
         asyncMap<U, K = Awaited<U>>(
@@ -67,34 +90,7 @@ declare global {
         entriesWithKeyFilter(filter: (key: K) => boolean): [K, V][];
         toObject(): K extends string | symbol ? Record<K, V> : Record<string, V>;
     }
-    interface Object {
-        toMap<V>(this: Record<string, V>): Map<string, V>;
-        entriesWithKeyFilter<V>(this: Record<string, V>, filter: (key: string) => boolean): [string, V][];
-    }
 }
-
-Object.prototype.toMap = function <V>(this: Record<string, V>): Map<string, V> {
-    const map = new Map<string, V>();
-    // 处理字符串键
-    Object.entries(this).forEach(([key, value]) => {
-        map.set(key, value);
-    });
-    return map;
-};
-
-Object.prototype.entriesWithKeyFilter = function <V>(this: Record<string, V>, filter: (key: string) => boolean): [string, V][] {
-    const entries: [string, V][] = [];
-    if (typeof filter !== 'function') {
-        return entries
-    }
-    // 处理字符串键
-    Object.entries(this).forEach(([key, value]) => {
-        if (filter(key)) {
-            entries.push([key, value]);
-        }
-    });
-    return entries;
-};
 
 Map.prototype.toObject = function <K, V>(this: Map<K, V>): Record<string | symbol, V> {
     const obj: Record<string | symbol, V> = {};
