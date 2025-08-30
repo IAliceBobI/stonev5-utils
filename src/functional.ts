@@ -72,35 +72,21 @@ declare global {
         map<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B[]>;
         mapMkUniq<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B>;
         mapMk<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]>;
-        hasPrefix(prefix: string): boolean;
-        hasSuffix(suffix: string): boolean;
+        entriesWithKeyFilter(filter: (key: K) => boolean): [K, V][];
     }
 }
 
-Map.prototype.hasPrefix = function <K, V>(this: Map<K, V>, prefix: string): boolean {
-    if (typeof prefix !== 'string') {
-        return false;
+Map.prototype.entriesWithKeyFilter = function <K, V>(this: Map<K, V>, filter: (key: K) => boolean): [K, V][] {
+    const entries: [K, V][] = [];
+    if (typeof filter !== 'function') {
+        return entries
     }
-    for (const key of this.keys()) {
-        const keyStr = String(key);
-        if (keyStr.startsWith(prefix)) {
-            return true;
+    for (const [key, value] of this.entries()) {
+        if (filter(key)) {
+            entries.push([key, value]);
         }
     }
-    return false;
-};
-
-Map.prototype.hasSuffix = function <K, V>(this: Map<K, V>, suffix: string): boolean {
-    if (typeof suffix !== 'string') {
-        return false;
-    }
-    for (const key of this.keys()) {
-        const keyStr = String(key);
-        if (keyStr.endsWith(suffix)) {
-            return true;
-        }
-    }
-    return false;
+    return entries
 };
 
 Array.prototype.collapse = function <T>(this: T[], callback: (accumulator: T, current: T) => T): T[] {
