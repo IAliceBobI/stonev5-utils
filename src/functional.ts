@@ -2,6 +2,14 @@ export function into<U>(fn: () => U) {
     return fn();
 }
 
+export function objectToMap<T>(obj: Record<string, T>): Map<string, T> {
+    const map = new Map<string, T>();
+    for (const [key, value] of Object.entries(obj)) {
+        map.set(key, value);
+    }
+    return map;
+}
+
 declare global {
     interface Array<T> {
         asyncMap<U, K = Awaited<U>>(
@@ -64,8 +72,36 @@ declare global {
         map<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A, B]): Map<A, B[]>;
         mapMkUniq<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B>;
         mapMk<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]>;
+        hasPrefix(prefix: string): boolean;
+        hasSuffix(suffix: string): boolean;
     }
 }
+
+Map.prototype.hasPrefix = function <K, V>(this: Map<K, V>, prefix: string): boolean {
+    if (typeof prefix !== 'string') {
+        return false;
+    }
+    for (const key of this.keys()) {
+        const keyStr = String(key);
+        if (keyStr.startsWith(prefix)) {
+            return true;
+        }
+    }
+    return false;
+};
+
+Map.prototype.hasSuffix = function <K, V>(this: Map<K, V>, suffix: string): boolean {
+    if (typeof suffix !== 'string') {
+        return false;
+    }
+    for (const key of this.keys()) {
+        const keyStr = String(key);
+        if (keyStr.endsWith(suffix)) {
+            return true;
+        }
+    }
+    return false;
+};
 
 Array.prototype.collapse = function <T>(this: T[], callback: (accumulator: T, current: T) => T): T[] {
     if (this.length === 0) {
