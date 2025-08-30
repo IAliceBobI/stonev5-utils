@@ -73,8 +73,18 @@ declare global {
         mapMkUniq<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B>;
         mapMk<A, B>(callback: (key: K, value: V, map: Map<K, V>) => [A[], B]): Map<A, B[]>;
         entriesWithKeyFilter(filter: (key: K) => boolean): [K, V][];
+        toObject(): K extends string | symbol ? Record<K, V> : Record<string, V>;
     }
 }
+
+Map.prototype.toObject = function <K, V>(this: Map<K, V>): Record<string | symbol, V> {
+    const obj: Record<string | symbol, V> = {};
+    for (const [key, value] of this.entries()) {
+        const objKey = typeof key === 'symbol' ? key : String(key);
+        obj[objKey] = value;
+    }
+    return obj;
+};
 
 Map.prototype.entriesWithKeyFilter = function <K, V>(this: Map<K, V>, filter: (key: K) => boolean): [K, V][] {
     const entries: [K, V][] = [];
