@@ -65,6 +65,7 @@ declare global {
         ): this;
         sum<U>(fn?: (value: T, index: number, array: T[]) => U): number;
         extend(...items: T[]): this;
+        extendArr(items: T[]): this;
         atOr(index: number, defaultValue: T | (() => T)): T;
         collapse(callback: (accumulator: T, current: T) => T): T[];
     }
@@ -219,6 +220,11 @@ Array.prototype.atOr = function <T>(this: T[], index: number, defaultValue: T | 
     return typeof defaultValue === 'function'
         ? (defaultValue as () => T)()
         : defaultValue;
+};
+
+Array.prototype.extendArr = function <T>(this: T[], items: T[]): T[] {
+    this.push(...items);
+    return this;
 };
 
 Array.prototype.extend = function <T>(this: T[], ...items: T[]): T[] {
