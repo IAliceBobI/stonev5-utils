@@ -68,6 +68,7 @@ declare global {
         extendArr(items: T[]): this;
         atOr(index: number, defaultValue: T | (() => T)): T;
         collapse(callback: (accumulator: T, current: T) => T): T[];
+        findOrLesser(predicate: (value: T) => number): T | undefined;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -95,6 +96,36 @@ declare global {
         getLastNumber(defaultValue?: number | null): number | null;
     }
 }
+
+Array.prototype.findOrLesser = function <T>(this: T[], predicate: (value: T) => number): T | undefined {
+    // 空数组直接返回undefined
+    if (this.length === 0) return undefined;
+
+    let low = 0;
+    let high = this.length - 1;
+    let result: T | undefined = undefined;
+
+    // 使用二分查找提高效率
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const comparison = predicate(this[mid]);
+
+        if (comparison === 0) {
+            // 找到匹配元素
+            return this[mid];
+        } else if (comparison < 0) {
+            // 当前元素小于目标，可能是候选结果
+            result = this[mid];
+            low = mid + 1;
+        } else {
+            // 当前元素大于目标，缩小查找范围
+            high = mid - 1;
+        }
+    }
+
+    // 返回最后找到的小于目标的元素
+    return result;
+};
 
 String.prototype.getLastNumber = function (defaultValue: number | null = null): number | null {
     const matches = this.match(/\d+/g);
