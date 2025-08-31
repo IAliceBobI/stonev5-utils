@@ -131,6 +131,52 @@ export function setTimeouts(cb: Func, start: number, end: number, step: number) 
     }
 }
 
+/**
+ * 可取消的setTimeouts版本
+ * @param cb 回调函数，当返回true时会取消后续执行
+ * @param start 起始延迟时间(ms)
+ * @param end 结束延迟时间(ms)
+ * @param step 步长(ms)
+ * @returns 取消函数，调用后会清除所有未执行的超时
+ */
+export function cancelableSetTimeouts(
+    cb: () => boolean | void,
+    start: number,
+    end: number,
+    step: number
+): () => void {
+    // 存储所有超时ID以便取消
+    const timeoutIds: number[] = [];
+    let isCancelled = false;
+
+    // 生成所有超时
+    for (let delay = start; delay <= end; delay += step) {
+        const id = window.setTimeout(() => {
+            // 如果已经取消，则直接返回
+            if (isCancelled) return;
+
+            // 执行回调并检查是否需要取消后续执行
+            const shouldCancel = cb();
+            if (shouldCancel) {
+                cancel();
+            }
+        }, delay);
+
+        timeoutIds.push(id);
+    }
+
+    // 取消函数
+    function cancel() {
+        if (isCancelled) return;
+
+        isCancelled = true;
+        // 清除所有未执行的超时
+        timeoutIds.forEach(id => clearTimeout(id));
+    }
+
+    return cancel;
+}
+
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
