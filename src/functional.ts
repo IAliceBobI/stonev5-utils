@@ -92,14 +92,14 @@ declare global {
         toObject(): K extends string | symbol ? Record<K, V> : Record<string, V>;
     }
     interface String {
-        getLastNumber(): number | null;
+        getLastNumber(defaultValue?: number | null): number | null;
     }
 }
 
-String.prototype.getLastNumber = function (): number | null {
+String.prototype.getLastNumber = function (defaultValue: number | null = null): number | null {
     const matches = this.match(/\d+/g);
     if (!matches || matches.length === 0) {
-        return null;
+        return defaultValue;
     }
     return Number(matches[matches.length - 1]);
 };
