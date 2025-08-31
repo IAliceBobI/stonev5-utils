@@ -68,6 +68,14 @@ declare global {
         extendArr(items: T[]): this;
         atOr(index: number, defaultValue: T | (() => T)): T;
         collapse(callback: (accumulator: T, current: T) => T): T[];
+        /**
+         * 在已排序的数组中查找元素，如果找不到则返回最大的小于目标的元素
+         * @param predicate 比较回调函数，返回值：
+         *   - 负数：当前元素小于目标
+         *   - 0：当前元素匹配目标
+         *   - 正数：当前元素大于目标
+         * @returns 找到的元素或最大的小于目标的元素，如无则返回undefined
+         */
         findOrLesser(predicate: (value: T) => number): T | undefined;
     }
     interface Iterator<T> {
