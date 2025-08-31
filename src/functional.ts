@@ -91,7 +91,18 @@ declare global {
         entriesWithKeyFilter(filter: (key: K) => boolean): [K, V][];
         toObject(): K extends string | symbol ? Record<K, V> : Record<string, V>;
     }
+    interface String {
+        getLastNumber(): number | null;
+    }
 }
+
+String.prototype.getLastNumber = function (): number | null {
+    const matches = this.match(/\d+/g);
+    if (!matches || matches.length === 0) {
+        return null;
+    }
+    return Number(matches[matches.length - 1]);
+};
 
 Map.prototype.toObject = function <K, V>(this: Map<K, V>): Record<string | symbol, V> {
     const obj: Record<string | symbol, V> = {};
