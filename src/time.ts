@@ -139,7 +139,7 @@ export function setTimeouts(cb: Func, start: number, end: number, step: number) 
  * @param step 步长(ms)
  * @returns 取消函数，调用后会清除所有未执行的超时
  */
-export function cancelableSetTimeouts(
+export function setTimeoutOnce(
     cb: () => boolean | void,
     start: number,
     end: number,
