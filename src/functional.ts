@@ -103,7 +103,22 @@ declare global {
     interface String {
         getLastNumber(defaultValue?: number | null): number | null;
     }
+    interface Set<T> {
+        /**
+         * 一次性添加多个元素到Set中
+         * @param elements 要添加的元素集合（可迭代对象）
+         * @returns 当前Set实例，便于链式调用
+         */
+        addAll(elements: Iterable<T>): this;
+    }
 }
+
+Set.prototype.addAll = function <T>(this: Set<T>, elements: Iterable<T>): Set<T> {
+    for (const element of elements) {
+        this.add(element);
+    }
+    return this;
+};
 
 Array.prototype.findOrLesser = function <T>(this: T[], predicate: (value: T) => number): T | undefined {
     // 空数组直接返回undefined
