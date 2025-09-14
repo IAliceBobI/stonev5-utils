@@ -1,0 +1,33 @@
+{
+  "name": "stonev5-utils-node",
+  "version": "1.1.24",
+  "description": "all my utils here (Node.js version)",
+  "main": "../lib-node/index.js",
+  "typings": "../lib-node/index.d.ts",
+  "files": [
+    "../lib-node"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IAliceBobI/stonev5-utils.git"
+  },
+  "keywords": [
+    "utils",
+    "cmd",
+    "file",
+    "global",
+    "string",
+    "time",
+    "pinyin",
+    "rand",
+    "object",
+    "array",
+    "desktop",
+    "nodejs",
+    "stonev5",
+    "library"
+  ],
+  "author": "stonev5",
+  "license": "ISC",
+  "type": "module"
+}
