@@ -7,6 +7,8 @@ const config: Config.InitialOptions = {
   collectCoverage: false,
   coverageDirectory: 'coverage',
   verbose: false,
+  collectCoverageFrom: [],
+  coverageReporters: [],
 };
 
 export default config;

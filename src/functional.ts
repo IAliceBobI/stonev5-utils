@@ -77,6 +77,23 @@ declare global {
          * @returns 找到的元素或最大的小于目标的元素，如无则返回undefined
          */
         findOrLesser(predicate: (value: T) => number): T | undefined;
+        /**
+         * 串行执行数组中的任务
+         * 每个任务应该是一个返回Promise的函数
+         * @returns 所有任务执行结果的Promise数组
+         */
+        executeSequentially(): Promise<unknown[]>;
+        /**
+        * 将数组中的任务分成指定数量的小组并行执行
+        * 每个小组内部的任务串行执行，小组之间并发执行
+        * @param groupCount 小组数量，即并发数
+        * @param taskHandler 处理每个任务的函数，返回Promise
+        * @returns 所有任务执行完成后的结果数组
+        */
+        groupedParallelExecute<U>(
+            groupCount: number,
+            taskHandler: (item: T, index: number, array: T[]) => Promise<U>
+        ): Promise<U[]>;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -112,6 +129,71 @@ declare global {
         addAll(elements: Iterable<T>): this;
     }
 }
+
+Array.prototype.groupedParallelExecute = async function <T, U>(
+    this: T[],
+    groupCount: number,
+    taskHandler: (item: T, index: number, array: T[]) => Promise<U>
+): Promise<U[]> {
+    // 边界情况处理：空数组直接返回
+    if (this.length === 0) {
+        return [];
+    }
+
+    // 确保分组数量合理
+    const actualGroupCount = Math.max(1, Math.min(groupCount, this.length));
+
+    // 创建分组
+    const groups: number[][] = Array.from({ length: actualGroupCount }, () => []);
+
+    // 分配任务索引到各个小组（只保存索引，避免数据复制）
+    this.forEach((_, index) => {
+        const groupIndex = index % actualGroupCount;
+        groups[groupIndex].push(index);
+    });
+
+    // 存储结果，保持原始顺序
+    const results: U[] = new Array(this.length);
+
+    // 定义每个小组的执行函数（串行执行小组内任务）
+    const executeGroup = async (group: number[]) => {
+        for (const index of group) {
+            try {
+                const result = await taskHandler(this[index], index, this);
+                results[index] = result;
+            } catch (error) {
+                // 确保错误能够正确传播
+                throw error;
+            }
+        }
+    };
+
+    // 并发执行所有小组
+    await Promise.all(groups.map(group => executeGroup(group)));
+
+    return results;
+};
+
+Array.prototype.executeSequentially = async function <T extends () => Promise<unknown>>() {
+    const results: unknown[] = [];
+    // 遍历数组中的每个任务并按顺序执行
+    for (const task of this as T[]) {
+        if (typeof task !== 'function') {
+            throw new Error('数组元素必须是返回Promise的函数');
+        }
+        try {
+            // 等待当前任务完成后再执行下一个
+            const result = await task();
+            results.push(result);
+        } catch (error) {
+            // 可以根据需要决定是继续执行还是停止
+            console.error('任务执行出错:', error);
+            // 如果希望出错后停止，可以在这里抛出错误
+            // throw error;
+        }
+    }
+    return results;
+};
 
 Set.prototype.addAll = function <T>(this: Set<T>, elements: Iterable<T>): Set<T> {
     for (const element of elements) {

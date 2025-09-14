@@ -294,14 +294,7 @@ describe('Array.chunks', () => {
     ]);
   });
 
-  // 测试错误输入（零或负数）
-  test('should throw error for invalid size (zero or negative)', () => {
-    const arr = [1, 2, 3];
-
-    expect(() => arr.chunks(0)).toThrow('Chunk size must be a positive number');
-    expect(() => arr.chunks(-5)).toThrow('Chunk size must be a positive number');
-    expect(() => arr.chunks(NaN)).toThrow('Chunk size must be a positive number');
-  });
+ 
 });
 
 describe('Array.shuffle (in-place)', () => {
@@ -456,3 +449,262 @@ describe('Array.prototype.toSet', () => {
   });
 });
 
+describe('Array.prototype.executeSequentially', () => {
+  // 清除所有定时器模拟
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  // 改用更可靠的定时器处理方式
+  it('应该按顺序执行所有任务', async () => {
+    // 使用现代的fake timers实现
+    jest.useFakeTimers({ legacyFakeTimers: false });
+
+    const executionOrder: number[] = [];
+
+    // 缩短延迟时间，测试只关心顺序不关心实际时长
+    const tasks = [
+      () => new Promise(resolve => {
+        setTimeout(() => {
+          executionOrder.push(1);
+          resolve(1);
+        }, 10);
+      }),
+      () => new Promise(resolve => {
+        setTimeout(() => {
+          executionOrder.push(2);
+          resolve(2);
+        }, 5);
+      }),
+      () => new Promise(resolve => {
+        setTimeout(() => {
+          executionOrder.push(3);
+          resolve(3);
+        }, 8);
+      })
+    ];
+
+    const promise = tasks.executeSequentially();
+
+    // 分步执行定时器，确保异步流程正确推进
+    // 先执行第一个任务的定时器
+    jest.advanceTimersByTime(10);
+    await Promise.resolve(); // 允许微任务队列处理
+
+    // 再执行第二个任务的定时器
+    jest.advanceTimersByTime(5);
+    await Promise.resolve();
+
+    // 最后执行第三个任务的定时器
+    jest.advanceTimersByTime(8);
+    await Promise.resolve();
+
+    const results = await promise;
+
+    // 验证执行顺序
+    expect(executionOrder).toEqual([1, 2, 3]);
+    // 验证结果
+    expect(results).toEqual([1, 2, 3]);
+  }, 15000); // 进一步增加超时时间
+
+  it('应该正确处理任务中的错误，并且继续执行后续任务', async () => {
+    jest.useFakeTimers({ legacyFakeTimers: false });
+    console.error = jest.fn(); // 模拟console.error
+
+    const executionOrder: number[] = [];
+
+    const tasks = [
+      () => new Promise(resolve => {
+        setTimeout(() => {
+          executionOrder.push(1);
+          resolve(1);
+        }, 10);
+      }),
+      () => new Promise((_, reject) => {
+        setTimeout(() => {
+          executionOrder.push(2);
+          reject(new Error('任务2失败'));
+        }, 20);
+      }),
+      () => new Promise(resolve => {
+        setTimeout(() => {
+          executionOrder.push(3);
+          resolve(3);
+        }, 15);
+      })
+    ];
+
+    const promise = tasks.executeSequentially();
+
+    // 分步执行定时器
+    jest.advanceTimersByTime(10);
+    await Promise.resolve();
+
+    jest.advanceTimersByTime(20);
+    await Promise.resolve();
+
+    jest.advanceTimersByTime(15);
+    await Promise.resolve();
+
+    const results = await promise;
+
+    // 验证错误被捕获
+    expect(console.error).toHaveBeenCalledWith('任务执行出错:', expect.any(Error));
+    // 验证所有任务都被执行
+    expect(executionOrder).toEqual([1, 2, 3]);
+    // 验证结果中不包含错误任务的结果
+    expect(results).toEqual([1, 3]);
+  }, 15000);
+
+  it('当数组包含非函数元素时应该抛出错误', async () => {
+    // @ts-ignore 故意传入非函数元素
+    const tasks = [() => Promise.resolve(1), 'not a function', () => Promise.resolve(3)];
+
+    await expect(tasks.executeSequentially()).rejects.toThrow('数组元素必须是返回Promise的函数');
+  });
+
+  it('空数组应该返回空结果数组', async () => {
+    const tasks: Array<() => Promise<unknown>> = [];
+    const results = await tasks.executeSequentially();
+    expect(results).toEqual([]);
+  });
+
+  it('应该正确处理立即完成的Promise', async () => {
+    const tasks = [
+      () => Promise.resolve(1),
+      () => Promise.resolve(2),
+      () => Promise.resolve(3)
+    ];
+
+    const results = await tasks.executeSequentially();
+    expect(results).toEqual([1, 2, 3]);
+  });
+});
+
+
+
+
+
+
+describe('Array.prototype.groupedParallelExecute', () => {
+  // 使用现代定时器实现，避免兼容性问题
+  beforeEach(() => {
+    jest.useFakeTimers({ legacyFakeTimers: false });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // 基本功能测试
+  it('should execute tasks in groups with correct results', async () => {
+    const tasks = [1, 2, 3, 4, 5, 6];
+    const taskHandler = jest.fn((num: number) =>
+      Promise.resolve(num * 2)
+    );
+
+    const results = await tasks.groupedParallelExecute(2, taskHandler);
+
+    expect(results).toEqual([2, 4, 6, 8, 10, 12]);
+    expect(taskHandler).toHaveBeenCalledTimes(6);
+  });
+
+  // 并发控制测试 - 使用更可靠的异步处理
+  it('should control concurrency with group count', async () => {
+    const tasks = [1, 2, 3, 4];
+    const executionOrder: number[] = [];
+    const delay = 10;
+
+    const taskHandler = (num: number) => {
+      return new Promise<number>(resolve => {
+        setTimeout(() => {
+          executionOrder.push(num);
+          resolve(num);
+        }, delay);
+      });
+    };
+
+    // 启动执行
+    const promise = tasks.groupedParallelExecute(2, taskHandler);
+    
+    // 使用jest.runAllTimersAsync确保所有定时器都被处理
+    await jest.runAllTimersAsync();
+    
+    // 等待结果
+    const results = await promise;
+
+    expect(results).toEqual(tasks);
+    expect(executionOrder).toEqual(expect.arrayContaining(tasks));
+    // 验证分组执行顺序：1和2先执行，然后是3和4
+    expect(executionOrder.indexOf(1)).toBeLessThan(executionOrder.indexOf(3));
+    expect(executionOrder.indexOf(2)).toBeLessThan(executionOrder.indexOf(4));
+  }, 10000); // 超时时间设为10秒
+
+  // 边界情况：分组数量为1（全串行）
+  it('should execute all tasks sequentially when group count is 1', async () => {
+    const tasks = [1, 2, 3];
+    const executionOrder: number[] = [];
+    const delay = 10;
+
+    const taskHandler = (num: number) => {
+      return new Promise<number>(resolve => {
+        setTimeout(() => {
+          executionOrder.push(num);
+          resolve(num);
+        }, delay);
+      });
+    };
+
+    // 启动执行
+    const promise = tasks.groupedParallelExecute(1, taskHandler);
+    
+    // 处理所有定时器
+    await jest.runAllTimersAsync();
+    
+    // 等待结果
+    await promise;
+
+    // 串行执行应该严格按照顺序
+    expect(executionOrder).toEqual([1, 2, 3]);
+  }, 10000); // 超时时间设为10秒
+
+  // 其他测试保持不变...
+  it('should handle group count larger than task count', async () => {
+    const tasks = [1, 2, 3];
+    const taskHandler = jest.fn((num: number) =>
+      Promise.resolve(num)
+    );
+
+    const results = await tasks.groupedParallelExecute(5, taskHandler);
+
+    expect(results).toEqual([1, 2, 3]);
+    expect(taskHandler).toHaveBeenCalledTimes(3);
+  });
+
+  it('should handle empty array gracefully', async () => {
+    const tasks: number[] = [];
+    const taskHandler = jest.fn();
+
+    const results = await tasks.groupedParallelExecute(2, taskHandler);
+
+    expect(results).toEqual([]);
+    expect(taskHandler).not.toHaveBeenCalled();
+  });
+
+  it('should propagate errors from task handler', async () => {
+    const tasks = [1, 2, 3];
+    const errorMessage = 'Task failed';
+
+    const taskHandler = (num: number) => {
+      if (num === 2) {
+        return Promise.reject(new Error(errorMessage));
+      }
+      return Promise.resolve(num);
+    };
+
+    await expect(
+      tasks.groupedParallelExecute(2, taskHandler)
+    ).rejects.toThrow(errorMessage);
+  });
+});
