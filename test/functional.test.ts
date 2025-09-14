@@ -582,11 +582,6 @@ describe('Array.prototype.executeSequentially', () => {
   });
 });
 
-
-
-
-
-
 describe('Array.prototype.groupedParallelExecute', () => {
   // 使用现代定时器实现，避免兼容性问题
   beforeEach(() => {

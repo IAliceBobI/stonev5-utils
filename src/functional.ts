@@ -90,10 +90,7 @@ declare global {
         * @param taskHandler 处理每个任务的函数，返回Promise
         * @returns 所有任务执行完成后的结果数组
         */
-        groupedParallelExecute<U>(
-            groupCount: number,
-            taskHandler: (item: T, index: number, array: T[]) => Promise<U>
-        ): Promise<U[]>;
+        groupedParallelExecute<U>(groupCount: number, taskHandler: (item: T, index: number, array: T[]) => Promise<U>): Promise<U[]>;
     }
     interface Iterator<T> {
         toArray(): T[];
@@ -130,11 +127,7 @@ declare global {
     }
 }
 
-Array.prototype.groupedParallelExecute = async function <T, U>(
-    this: T[],
-    groupCount: number,
-    taskHandler: (item: T, index: number, array: T[]) => Promise<U>
-): Promise<U[]> {
+Array.prototype.groupedParallelExecute = async function <T, U>(this: T[], groupCount: number, taskHandler: (item: T, index: number, array: T[]) => Promise<U>): Promise<U[]> {
     // 边界情况处理：空数组直接返回
     if (this.length === 0) {
         return [];
