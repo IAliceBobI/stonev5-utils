@@ -1,3 +1,4 @@
 node_modules
 /lib
 /coverage
+/node-package/lib
