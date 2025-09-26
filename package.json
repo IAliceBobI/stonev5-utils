@@ -1,6 +1,6 @@
 {
   "name": "stonev5-utils",
-  "version": "1.1.26",
+  "version": "1.1.27",
   "description": "all my utils here (browser version)",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,10 +16,9 @@
     "test:watch": "jest --watchAll",
     "build": "npx tsc -p .",
     "build-node": "npx tsc -p ./node-package/tsconfig-node.json",
-    "build-all": "npm run build && npm run build-node",
     "push": "npm version patch && npm publish",
     "pub": "npm run build && npm run push",
-    "pub-node": "npm run build-node && cd node-package && npm publish"
+    "pub-node": "npm run build-node && cd node-package && npm run push"
   },
   "keywords": [
     "utils",
