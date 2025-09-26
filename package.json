@@ -16,9 +16,8 @@
     "test:watch": "jest --watchAll",
     "build": "npx tsc -p .",
     "build-node": "npx tsc -p ./node-package/tsconfig-node.json",
-    "push": "npm version patch && npm publish",
-    "pub": "npm run build && npm run push",
-    "pub-node": "npm run build-node && cd node-package && npm run push"
+    "pub": "npm run build && npm version patch && npm publish",
+    "pub-node": "npm run build-node && cd node-package && npm version patch && npm publish"
   },
   "keywords": [
     "utils",
