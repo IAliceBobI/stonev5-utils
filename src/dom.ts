@@ -1,4 +1,4 @@
-import { strCode } from "./string";
+import { strCode } from "./string.js";
 
 export function dom2div(dom: string) {
     const div = document.createElement("div") as HTMLElement;
