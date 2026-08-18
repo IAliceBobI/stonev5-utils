@@ -1,6 +1,6 @@
 # stonev5-utils — Agent 工作指南
 
-个人 TypeScript 工具函数库（浏览器版），发布为 npm 包 `stonev5-utils`。纯函数、零运行时依赖，用户按 `stonev5-utils/lib/<模块>` 子路径导入以支持 tree-shaking。
+个人 TypeScript 工具函数库（浏览器版），发布为 npm 包 `stonev5-utils`。纯函数，所有模块从根入口 re-export（也兼容 `stonev5-utils/lib/<模块>` 子路径导入），已声明 `sideEffects: false` 支持 tree-shaking。
 
 ## 目录
 
@@ -28,8 +28,8 @@ npx jest test/time.test.ts       # 单跑一个测试文件
 
 - ESM（`"type": "module"`）；源码相对导入写 `.js` 扩展名（如 `import { strCode } from "./string.js"`），moduleResolution 为 bundler。
 - TS strict；全局类型放 `src/types/common.d.ts`。
-- 对第三方库的轻封装模块（md5→ts-md5、pinyin→pinyin-pro、id→uuid）只声明为 devDependency + README 表格，**不得**加入 dependencies（保持零运行时依赖）。
-- 新增模块：`src/<name>.ts` + 对应 `test/<name>.test.ts`，并在两份 README 的模块总览表中补一行。
+- 对第三方库的轻封装模块（md5→ts-md5、pinyin→pinyin-pro、id→uuid）声明为正式 `dependencies`（1.2.0 起从 devDependencies 移入），新封装模块照此办理，不要再走"让使用方自行安装"的旧模式。
+- 新增模块：`src/<name>.ts` + 在 `src/index.ts` 补 `export *`，加对应 `test/<name>.test.ts`，并在两份 README 的模块总览表中补一行。
 
 ## 改动前先读
 
