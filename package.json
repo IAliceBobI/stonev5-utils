@@ -11,6 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/IAliceBobI/stonev5-utils.git"
   },
+  "homepage": "https://github.com/IAliceBobI/stonev5-utils#readme",
+  "bugs": {
+    "url": "https://github.com/IAliceBobI/stonev5-utils/issues"
+  },
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watchAll",

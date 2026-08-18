@@ -1,45 +1,48 @@
 # stonev5-utils
 
 [![npm](https://img.shields.io/npm/v/stonev5-utils)](https://www.npmjs.com/package/stonev5-utils)
+[![npm downloads](https://img.shields.io/npm/dm/stonev5-utils)](https://www.npmjs.com/package/stonev5-utils)
 [![CI](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/ci.yml/badge.svg)](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/ci.yml)
 [![Publish](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml/badge.svg)](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 
-个人日常沉淀的 TypeScript 工具函数库（浏览器版），纯函数、零运行时依赖、按模块引用即可 tree-shaking。源码见 [src/](src/)，全部为 TypeScript。
+**English** | [简体中文](./README.zh-CN.md)
 
-## 安装
+A personal collection of TypeScript utility functions (browser flavor) — pure functions, zero runtime dependencies, import per module for tree-shaking. Source lives in [src/](src/), all TypeScript.
+
+## Install
 
 ```bash
 npm i stonev5-utils
 ```
 
-部分模块是对第三方库的轻封装，使用前需自行安装对应的依赖：
+Some modules are thin wrappers around third-party libraries — install the corresponding dependency yourself before using them:
 
-| 模块 | 需要安装 | 用法 |
-| ---- | -------- | ---- |
+| Module | Requires | Usage |
+| ------ | -------- | ----- |
 | md5 | `npm i ts-md5` | `import { getMd5 } from "stonev5-utils/lib/md5"` |
 | pinyin | `npm i pinyin-pro` | `import { getPinyin } from "stonev5-utils/lib/pinyin"` |
 | id | `npm i uuid` | `import { newID } from "stonev5-utils/lib/id"` |
 
-## 模块总览
+## Module overview
 
-| 模块 | 说明 |
-| ---- | ---- |
-| `lib/array` | 空安全的 push 族（`pushUniq` / `pushReplaceBy` / `removeFromArr`…）、范围生成 |
-| `lib/cmd` | `runCmd`：异步执行 shell 命令 |
-| `lib/desktop` | `osFs` / `osPath`：桌面端（思源笔记）文件系统与路径适配 |
-| `lib/dom` | HTML 转 div、清理零宽字符等 DOM 工具 |
-| `lib/file` | `tempFile`：写临时文件 |
-| `lib/functional` | `into` / `objectToMap` 等函数式小工具 |
-| `lib/global` | `getGlobal` / `setGlobal`：全局键值存取 |
-| `lib/object` | `set` / `clone` / `RefObj` / `newProxy`、类型守卫与数值校验 |
-| `lib/parallel` | `pmap` 系列并发映射（失败转 null，不中断整体） |
-| `lib/rand` | 随机数 |
-| `lib/string` | `replaceAll` / `htmlEscape` / `toJSON` / `splitByMiddle` 等 |
-| `lib/time` | `formatDate` / `getDayStr` / `sleep` / `readableDuration` 等 |
-| 根入口 | `copy2clipboard`：`import { copy2clipboard } from "stonev5-utils"` |
+| Module | Description |
+| ------ | ----------- |
+| `lib/array` | Null-safe push family (`pushUniq` / `pushReplaceBy` / `removeFromArr`…), range generation |
+| `lib/cmd` | `runCmd`: run shell commands asynchronously |
+| `lib/desktop` | `osFs` / `osPath`: desktop (SiYuan Note) filesystem & path adapters |
+| `lib/dom` | HTML-to-div, zero-width character cleanup and other DOM utilities |
+| `lib/file` | `tempFile`: write temporary files |
+| `lib/functional` | `into` / `objectToMap` and other functional helpers |
+| `lib/global` | `getGlobal` / `setGlobal`: global key-value storage |
+| `lib/object` | `set` / `clone` / `RefObj` / `newProxy`, type guards and numeric validation |
+| `lib/parallel` | `pmap` family of concurrent map helpers (failures become null, never abort the batch) |
+| `lib/rand` | Random numbers |
+| `lib/string` | `replaceAll` / `htmlEscape` / `toJSON` / `splitByMiddle` etc. |
+| `lib/time` | `formatDate` / `getDayStr` / `sleep` / `readableDuration` etc. |
+| Root entry | `copy2clipboard`: `import { copy2clipboard } from "stonev5-utils"` |
 
-## 快速上手
+## Quick start
 
 ```ts
 import { getMd5 } from "stonev5-utils/lib/md5";
@@ -50,33 +53,34 @@ import { pmap } from "stonev5-utils/lib/parallel";
 
 const id = newID();                    // uuid
 const hash = getMd5("hello");          // md5
-const py = getPinyin("中文标题");       // 拼音
-const now = formatDate(0);             // 当前日期时间
+const py = getPinyin("中文标题");       // pinyin
+const now = formatDate(0);             // current date & time
 await sleep(1000);
 
-// 并发执行，单个失败会被跳过、不抛异常（需要保留 null 用 pmapNull）
+// Concurrent map: individual failures are skipped, nothing throws
+// (use pmapNull if you want nulls kept in the result)
 const results = await pmap(urls, (u) => fetch(u).then((r) => r.text()));
 ```
 
-> Node.js 环境版本见 [node-package/](node-package/)（曾以 `stonev5-utils-node` 发布，包名已回收，暂未重新发布）。
+> For the Node.js flavor see [node-package/](node-package/) (formerly published as `stonev5-utils-node`; that package name has been reclaimed and it is not currently republished).
 
-## 开发
+## Development
 
 ```bash
 npm test        # jest
-npm run build   # tsc 编译到 lib/
+npm run build   # tsc compile to lib/
 ```
 
-## 发布（GitHub Actions 自动发包）
+## Publishing (automated via GitHub Actions)
 
-发布完全由 GitHub 的计算资源完成，本地无需登录 npm：
+Publishing runs entirely on GitHub's infrastructure — no local npm login needed:
 
-1. npmjs.com 上为本包配置一次 [Trusted Publishing](https://docs.npmjs.com/trusted-publishers)，指向本仓库的 `.github/workflows/publish.yml`；
-2. 改完代码后执行：
+1. Configure [Trusted Publishing](https://docs.npmjs.com/trusted-publishers) once on npmjs.com, pointing at this repo's `.github/workflows/publish.yml`;
+2. After your changes:
 
 ```bash
-npm version patch          # 自动 bump 版本并生成 commit + v* 标签
-git push && git push --tags  # 推送标签即触发发布
+npm version patch            # bump version, create commit + v* tag
+git push && git push --tags  # pushing the tag triggers the release
 ```
 
-CI 会校验标签与版本一致 → 跑测试 → 构建 → 以 OIDC trusted publishing 方式发布到 npm（自动附带 provenance 证明），全程无需 token。
+CI verifies tag/version match → runs tests → builds → publishes to npm via OIDC trusted publishing (provenance included automatically), no token required.
