@@ -8,7 +8,7 @@
 
 [English](../README.md) | **简体中文**
 
-个人日常沉淀的 TypeScript 工具函数库（浏览器版），纯函数、零运行时依赖、按模块引用即可 tree-shaking。源码见 [src/](src/)，全部为 TypeScript。
+个人日常沉淀的 TypeScript 工具函数库（浏览器版），纯函数、可从包根或按模块引用以支持 tree-shaking（已声明 `sideEffects: false`）。源码见 [src/](src/)，全部为 TypeScript。
 
 ## 安装
 
@@ -16,40 +16,41 @@
 npm i stonev5-utils
 ```
 
-部分模块是对第三方库的轻封装，使用前需自行安装对应的依赖：
+所有导出均可从包根使用。三个模块是对第三方库的轻封装，对应依赖（`ts-md5` / `pinyin-pro` / `uuid`）已声明为正式 `dependencies`，安装时自动带上，无需手动处理：
 
-| 模块 | 需要安装 | 用法 |
+| 模块 | 封装对象 | 用法 |
 | ---- | -------- | ---- |
-| md5 | `npm i ts-md5` | `import { getMd5 } from "stonev5-utils/lib/md5"` |
-| pinyin | `npm i pinyin-pro` | `import { getPinyin } from "stonev5-utils/lib/pinyin"` |
-| id | `npm i uuid` | `import { newID } from "stonev5-utils/lib/id"` |
+| md5 | `ts-md5` | `import { getMd5 } from "stonev5-utils"` |
+| pinyin | `pinyin-pro` | `import { getPinyin } from "stonev5-utils"` |
+| id | `uuid` | `import { newID } from "stonev5-utils"` |
 
 ## 模块总览
+
+所有模块均从根入口 re-export（`import { newID } from "stonev5-utils"`），也支持 `stonev5-utils/lib/time` 这类子路径导入以便更细粒度地 tree-shaking。
 
 | 模块 | 说明 |
 | ---- | ---- |
 | `lib/array` | 空安全的 push 族（`pushUniq` / `pushReplaceBy` / `removeFromArr`…）、范围生成 |
+| `lib/clipboard` | `copy2clipboard`：写入系统剪贴板 |
 | `lib/cmd` | `runCmd`：异步执行 shell 命令 |
 | `lib/desktop` | `osFs` / `osPath`：桌面端（思源笔记）文件系统与路径适配 |
 | `lib/dom` | HTML 转 div、清理零宽字符等 DOM 工具 |
 | `lib/file` | `tempFile`：写临时文件 |
 | `lib/functional` | `into` / `objectToMap` 等函数式小工具 |
 | `lib/global` | `getGlobal` / `setGlobal`：全局键值存取 |
+| `lib/id` | `newID`：基于 UUID 的唯一 ID |
+| `lib/md5` | `getMd5`：MD5 哈希 |
 | `lib/object` | `set` / `clone` / `RefObj` / `newProxy`、类型守卫与数值校验 |
 | `lib/parallel` | `pmap` 系列并发映射（失败转 null，不中断整体） |
+| `lib/pinyin` | `getPinyin` / `pinyinLongShort`：中文转拼音 |
 | `lib/rand` | 随机数 |
 | `lib/string` | `replaceAll` / `htmlEscape` / `toJSON` / `splitByMiddle` 等 |
 | `lib/time` | `formatDate` / `getDayStr` / `sleep` / `readableDuration` 等 |
-| 根入口 | `copy2clipboard`：`import { copy2clipboard } from "stonev5-utils"` |
 
 ## 快速上手
 
 ```ts
-import { getMd5 } from "stonev5-utils/lib/md5";
-import { getPinyin } from "stonev5-utils/lib/pinyin";
-import { newID } from "stonev5-utils/lib/id";
-import { formatDate, sleep } from "stonev5-utils/lib/time";
-import { pmap } from "stonev5-utils/lib/parallel";
+import { newID, getMd5, getPinyin, formatDate, sleep, pmap } from "stonev5-utils";
 
 const id = newID();                    // uuid
 const hash = getMd5("hello");          // md5

@@ -8,7 +8,7 @@
 
 **English** | [简体中文](./docs/README.zh-CN.md)
 
-A personal collection of TypeScript utility functions (browser flavor) — pure functions, zero runtime dependencies, import per module for tree-shaking. Source lives in [src/](src/), all TypeScript.
+A personal collection of TypeScript utility functions (browser flavor) — pure functions, import from the package root or per module for tree-shaking (`sideEffects: false`). Source lives in [src/](src/), all TypeScript.
 
 ## Install
 
@@ -16,40 +16,41 @@ A personal collection of TypeScript utility functions (browser flavor) — pure 
 npm i stonev5-utils
 ```
 
-Some modules are thin wrappers around third-party libraries — install the corresponding dependency yourself before using them:
+All exports are available from the package root. Three modules are thin wrappers around third-party libraries — their dependencies (`ts-md5` / `pinyin-pro` / `uuid`) are declared as regular `dependencies` and install automatically, no manual setup needed:
 
-| Module | Requires | Usage |
-| ------ | -------- | ----- |
-| md5 | `npm i ts-md5` | `import { getMd5 } from "stonev5-utils/lib/md5"` |
-| pinyin | `npm i pinyin-pro` | `import { getPinyin } from "stonev5-utils/lib/pinyin"` |
-| id | `npm i uuid` | `import { newID } from "stonev5-utils/lib/id"` |
+| Module | Wraps | Usage |
+| ------ | ----- | ----- |
+| md5 | `ts-md5` | `import { getMd5 } from "stonev5-utils"` |
+| pinyin | `pinyin-pro` | `import { getPinyin } from "stonev5-utils"` |
+| id | `uuid` | `import { newID } from "stonev5-utils"` |
 
 ## Module overview
+
+All modules re-export from the root entry (`import { newID } from "stonev5-utils"`). Subpath imports like `stonev5-utils/lib/time` are also supported for finer tree-shaking control.
 
 | Module | Description |
 | ------ | ----------- |
 | `lib/array` | Null-safe push family (`pushUniq` / `pushReplaceBy` / `removeFromArr`…), range generation |
+| `lib/clipboard` | `copy2clipboard`: write text to the system clipboard |
 | `lib/cmd` | `runCmd`: run shell commands asynchronously |
 | `lib/desktop` | `osFs` / `osPath`: desktop (SiYuan Note) filesystem & path adapters |
 | `lib/dom` | HTML-to-div, zero-width character cleanup and other DOM utilities |
 | `lib/file` | `tempFile`: write temporary files |
 | `lib/functional` | `into` / `objectToMap` and other functional helpers |
 | `lib/global` | `getGlobal` / `setGlobal`: global key-value storage |
+| `lib/id` | `newID`: UUID-based unique IDs |
+| `lib/md5` | `getMd5`: MD5 hash |
 | `lib/object` | `set` / `clone` / `RefObj` / `newProxy`, type guards and numeric validation |
 | `lib/parallel` | `pmap` family of concurrent map helpers (failures become null, never abort the batch) |
+| `lib/pinyin` | `getPinyin` / `pinyinLongShort`: Chinese-to-pinyin conversion |
 | `lib/rand` | Random numbers |
 | `lib/string` | `replaceAll` / `htmlEscape` / `toJSON` / `splitByMiddle` etc. |
 | `lib/time` | `formatDate` / `getDayStr` / `sleep` / `readableDuration` etc. |
-| Root entry | `copy2clipboard`: `import { copy2clipboard } from "stonev5-utils"` |
 
 ## Quick start
 
 ```ts
-import { getMd5 } from "stonev5-utils/lib/md5";
-import { getPinyin } from "stonev5-utils/lib/pinyin";
-import { newID } from "stonev5-utils/lib/id";
-import { formatDate, sleep } from "stonev5-utils/lib/time";
-import { pmap } from "stonev5-utils/lib/parallel";
+import { newID, getMd5, getPinyin, formatDate, sleep, pmap } from "stonev5-utils";
 
 const id = newID();                    // uuid
 const hash = getMd5("hello");          // md5
