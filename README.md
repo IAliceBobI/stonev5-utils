@@ -6,7 +6,7 @@
 [![Publish](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml/badge.svg)](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 
-**English** | [简体中文](./README.zh-CN.md)
+**English** | [简体中文](./docs/README.zh-CN.md)
 
 A personal collection of TypeScript utility functions (browser flavor) — pure functions, zero runtime dependencies, import per module for tree-shaking. Source lives in [src/](src/), all TypeScript.
 

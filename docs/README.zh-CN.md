@@ -6,7 +6,7 @@
 [![Publish](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml/badge.svg)](https://github.com/IAliceBobI/stonev5-utils/actions/workflows/publish.yml)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 
-[English](./README.md) | **简体中文**
+[English](../README.md) | **简体中文**
 
 个人日常沉淀的 TypeScript 工具函数库（浏览器版），纯函数、零运行时依赖、按模块引用即可 tree-shaking。源码见 [src/](src/)，全部为 TypeScript。
 
